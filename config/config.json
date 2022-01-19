@@ -1,6 +1,6 @@
 {
     "port": 8081,
-    "version": "0.2.0-Beta",
+    "version": "0.3.0-Beta",
     "production": true,
     "instanceName": "QuickClip",
     "users": [

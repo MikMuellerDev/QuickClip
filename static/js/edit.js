@@ -33,7 +33,7 @@ async function mainloop(id) {
 
   setTimeout(async () => {
     await mainloop(id);
-  }, 500);
+  }, 100);
 }
 
 async function quitSave() {
