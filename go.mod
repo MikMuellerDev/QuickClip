@@ -10,7 +10,14 @@ require (
 	github.com/MikMuellerDev/QuickClip/utils v0.0.0-00010101000000-000000000000
 )
 
-require golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+require (
+	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
+	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+)
 
 replace (
 	github.com/MikMuellerDev/QuickClip/middleware => ./cmd/middleware

@@ -21,11 +21,21 @@ func NewRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", middleware.LogRequest(indexGetHandler)).Methods("GET")
-	r.HandleFunc("/dash", middleware.AuthRequired(dashGetHandler)).Methods("GET")
+	r.HandleFunc("/admin", middleware.AuthRequired(middleware.LogRequest(adminGetHandler))).Methods("GET")
+	r.HandleFunc("/dash", middleware.LogRequest(dashGetHandler)).Methods("GET")
+	r.HandleFunc("/edit/{id}", middleware.LogRequest(editGetHandler)).Methods("GET")
 
+	r.HandleFunc("/api/user", middleware.LogRequest(getApiUser)).Methods("GET")
+	r.HandleFunc("/api/save", middleware.LogRequest(saveToFile)).Methods("PUT")
 	r.HandleFunc("/api/version", middleware.LogRequest(getVersion)).Methods("GET")
 	r.HandleFunc("/api/clips", middleware.LogRequest(getClips)).Methods("GET")
-	r.HandleFunc("/api/clips/update", middleware.LogRequest(modClip)).Methods("POST")
+	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(getClipById)).Methods("GET")
+	r.HandleFunc("/api/clip/refresh/{id}", getClipById).Methods("GET")
+
+	r.HandleFunc("/api/clips/update/{id}", middleware.ApiAuthRequired(middleware.LogRequest(removeClip))).Methods("DELETE")
+	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(editClip)).Methods("PUT")
+	r.HandleFunc("/api/clips/update", middleware.ApiAuthRequired(middleware.LogRequest(modClip))).Methods("POST")
+	r.HandleFunc("/api/clips/add", middleware.ApiAuthRequired(middleware.LogRequest(addClip))).Methods("POST")
 
 	r.HandleFunc("/login", middleware.LogRequest(loginGetHandler)).Methods("GET")
 	r.HandleFunc("/login", middleware.LogRequest(loginPostHandler)).Methods("POST")

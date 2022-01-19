@@ -1,11 +1,11 @@
 {
     "background_color": "black",
     "theme_color": "blue",
-    "orientation": "portrait",
+    "orientation": "portrait-primary",
     "lang": "en-US",
-    "categories": ["utilities", "multimedia"],
-    "description": "Headless radio control via webinterface, written in Go .",
-    "display": "fullscreen",
+    "categories": ["utilities"],
+    "description": "Take quick notes or use it as a extended clipboard.",
+    "display": "standalone",
     "icons": [
       {
         "src": "/static/media/product/icon.png",
@@ -13,7 +13,7 @@
         "type": "image/png"
       }
     ],
-    "name": "QuickClip Server",
+    "name": "QuickClip",
     "short_name": "QuickClip",
-    "start_url": "/"
+    "start_url": "/dash"
 }

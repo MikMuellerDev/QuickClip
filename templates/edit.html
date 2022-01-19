@@ -7,19 +7,19 @@
   <meta content="IE=edge" http-equiv="X-UA-Compatible" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <link rel="icon" type="image/x-icon" href="/static/media/product/favicon.png" />
-  
+
   <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/navbar.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/elevations.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/button.css" />
-  <link rel="stylesheet" type="text/css" href="/static/css/dash.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/edit.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/spinner.css" />
 
   <script src="/static/js/utils.js"></script>
   <script src="/static/js/version.js"></script>
   <script src="/static/js/api.js"></script>
-  <script src="/static/js/dash.js"></script>
   <script src="/static/js/spinner.js"></script>
+  <script src="/static/js/edit.js"></script>
 </head>
 
 <body>
@@ -37,25 +37,17 @@
   <div id="dash-body">
     <div id="main-body">
       <div id="main-body-navbar">
-        <h1>Select Document</h1>
+        <div id="navbar-left">
+          <h1 id="title">Editing ...</h1>
+          <div class="spinner" id="edit-spinner"></div>
+        </div>
         <div id="main-body-navbar-button-div">
-          <button class="button" id="login-button" type="submit">
-            <a id="loggout-button">logout</a>
+          <button class="button" id="login-button" type="submit" onclick="quitSave().then()">
+            <a>save & quit</a>
           </button>
         </div>
       </div>
-      <div id="doc-selector-div">
-        <!-- <div class="mode-item station threeDp">
-          <div class="node-item-left">
-            <div class="node-item-picture"></div>
-            <div class="node-item-labels">
-              <h2>Title</h2>
-              <h3>An interesting subtitle</h3>
-            </div>
-          </div>
-          <div class="node-item-select-indicator"></div>
-        </div> -->
-      </div>
+      <textarea id="clip" maxlength="500000"></textarea>
     </div>
   </div>
 </body>

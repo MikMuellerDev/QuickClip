@@ -7,11 +7,12 @@ type ResponseStruct struct {
 	Message   string
 }
 
-type StatusStruct struct {
-	Mode string
-}
-
 type VersionStruct struct {
 	Version    string
 	Production bool
+}
+
+type UserResponse struct {
+	User     string
+	LoggedIn bool
 }

@@ -6,19 +6,12 @@ import (
 	"io/ioutil"
 )
 
-type Mode struct {
-	Name        string
-	Description string
-	ImagePath   string
-	Url         string
-	Id          string
-	Volume      int
-}
-
 type Clip struct {
-	Name    string
-	Id      string
-	Content string
+	Name        string
+	Id          string
+	Content     string
+	Description string
+	Restricted  bool
 }
 
 type Clips struct {
@@ -26,12 +19,19 @@ type Clips struct {
 }
 
 var clips Clips
+var prevSave []byte
+var saveCounter = 10
 
 func ReadClipFile() {
 	path := "../config/clipboard.json"
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal("Error when opening file: ", err)
+		err = ioutil.WriteFile("../config/clipboard.json", []byte("{}"), 0644)
+		if err != nil {
+			log.Fatal("Error when opening file: ", err)
+			return
+		}
+		return
 	}
 	err = json.Unmarshal(content, &clips)
 	if err != nil {
@@ -40,8 +40,19 @@ func ReadClipFile() {
 	log.Debug(fmt.Sprintf("Loaded QuickClip Clipboard from %s", path))
 }
 
-func GetClips() Clips {
-	return clips
+func GetClips(username string) Clips {
+	var clipsCpy Clips
+	for _, v := range clips.Clips {
+		var clip = Clip{Name: v.Name, Id: v.Id, Content: "", Restricted: v.Restricted, Description: v.Description}
+		if v.Restricted {
+			if HasPermission(username, v.Id) || username == "admin" {
+				clipsCpy.Clips = append(clipsCpy.Clips, clip)
+			}
+		} else {
+			clipsCpy.Clips = append(clipsCpy.Clips, clip)
+		}
+	}
+	return clipsCpy
 }
 
 func DoesClipExist(id string) bool {
@@ -54,21 +65,30 @@ func DoesClipExist(id string) bool {
 	return false
 }
 
-func GetClipById(id string) *Clip {
+func GetClipById(id string, user string) (bool, Clip) {
 	for _, v := range clips.Clips {
 		if v.Id == id {
-			return &v
+			if v.Restricted {
+				if HasPermission(user, v.Id) || user == "admin" {
+					return true, v
+				} else {
+					log.Warn(fmt.Sprintf("User: %s requested restricted board: %s", user, id))
+					return false, Clip{"", "", "", "", false}
+				}
+			} else {
+				return true, v
+			}
 		}
 	}
 	log.Error(fmt.Sprintf("Requested board that does not exist: %s, DoesBoardExist() might have failed.", id))
-	return &Clip{"", "", ""}
+	return false, Clip{"", "", "", "", false}
 }
 
 func ModClipInList(clip Clip) {
 	var clipsCpy []Clip
 	for _, v := range clips.Clips {
 		if v.Id == clip.Id {
-			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content})
+			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Description: clip.Description, Restricted: clip.Restricted})
 		} else {
 			clipsCpy = append(clipsCpy, v)
 		}
@@ -76,27 +96,96 @@ func ModClipInList(clip Clip) {
 	clips.Clips = clipsCpy
 }
 
-func ModClip(id string, name string, content string) (bool, Clip) {
-	if DoesClipExist(id) {
-		var clip *Clip = GetClipById(id)
-		clip.Content = content
-		clip.Id = id
-		clip.Name = name
-
-		ModClipInList(*clip)
-
-		var jsonBlob = []byte(`{}`)
-		err := json.Unmarshal(jsonBlob, &clip)
-		if err != nil {
-			fmt.Println("opening config file", err.Error())
+func RemoveClip(id string) {
+	var clipsCpy []Clip
+	_, clip := GetClipById(id, "admin")
+	for _, v := range clips.Clips {
+		if id != clip.Id {
+			clipsCpy = append(clipsCpy, v)
 		}
+	}
+	clips.Clips = clipsCpy
+	writeClips(clips)
+}
 
-		clipJson, _ := json.Marshal(clip)
-		err = ioutil.WriteFile("output.json", clipJson, 0644)
-		fmt.Printf("%s", clipJson)
-		return true, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content}
+func AddClip(clip Clip) {
+	clips.Clips = append(clips.Clips, clip)
+	writeClips(clips)
+}
+
+func ModClip(clip Clip) (bool, Clip) {
+	if DoesClipExist(clip.Id) {
+		ModClipInList(clip)
+		writeClips(clips)
+		return true, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Restricted: clip.Restricted}
 	} else {
-		log.Warn(fmt.Sprintf("The Clip ID: %s does not exist.", id))
+		log.Warn(fmt.Sprintf("The Clip ID: %s does not exist.", clip.Id))
 	}
 	return false, Clip{}
+}
+
+func writeClips(clips Clips) {
+	var jsonBlob = []byte(`{}`)
+	err := json.Unmarshal(jsonBlob, &clips)
+	if err != nil {
+		log.Fatal("Error during unmarshal", err.Error())
+	}
+
+	clipJson, _ := json.Marshal(clips)
+	prevSave = clipJson
+	err = ioutil.WriteFile("../config/clipboard.json", clipJson, 0644)
+	log.Debug("Written clip contents to clipboard.json.")
+}
+
+func RequestSave() bool {
+	// First get a byte arr from the current state
+	var jsonBlob = []byte(`{}`)
+	err := json.Unmarshal(jsonBlob, &clips)
+	if err != nil {
+		log.Fatal("Error during unmarshal", err.Error())
+	}
+
+	clipJson, _ := json.Marshal(clips)
+
+	if string(prevSave) == string(clipJson) {
+		log.Trace("No save was triggered: identical states.")
+		return false
+	} else {
+		log.Trace("Saving changes due to changes.")
+		writeClips(clips)
+		prevSave = clipJson
+		return true
+	}
+}
+
+func EditClip(id string, content string, user string) bool {
+	_, clip := GetClipById(id, "admin")
+	if clip.Restricted {
+		if !HasPermission(user, id) && user != "admin" {
+			return false
+		}
+	}
+	var lenBefore int = 0
+	var clipsCpy []Clip
+
+	for _, v := range clips.Clips {
+		if v.Id == id {
+			lenBefore = len(v.Content)
+			clipsCpy = append(clipsCpy, Clip{Name: v.Name, Id: v.Id, Content: content, Description: v.Description, Restricted: v.Restricted})
+		} else {
+			clipsCpy = append(clipsCpy, v)
+		}
+	}
+
+	clips.Clips = clipsCpy
+	if len(content)-lenBefore > 1 {
+		saveCounter = 10
+		writeClips(clips)
+	} else if saveCounter <= 0 {
+		writeClips(clips)
+		saveCounter = 10
+	}
+	saveCounter--
+	log.Trace(fmt.Sprintf("Save Counter at: %d", saveCounter))
+	return true
 }

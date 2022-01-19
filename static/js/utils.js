@@ -1,22 +1,14 @@
-function getIds(modes) {
-  let ids = [];
-  for (let mode of modes) {
-    ids.push(mode.Id);
+function setButtonText(loggedIn) {
+  const button = document.getElementById("loggout-button");
+  if (loggedIn) {
+    button.innerText = "logout";
+    button.onclick = () => {
+      window.location.href = "/logout";
+    };
+  } else {
+    button.innerText = "login";
+    button.onclick = () => {
+      window.location.href = "/login";
+    };
   }
-  return ids;
-}
-
-function setCurrentModeGui(modeId, modes) {
-  const ids = getIds(modes);
-  for (let item of ids) {
-    setSmall(item);
-  }
-
-  const modeDiv = document.getElementById(modeId);
-  modeDiv.style.transform = "scale(1.05)";
-  modeDiv.style.filter = "brightness(100%)";
-  modeDiv.style.boxShadow = "0 0 0 3px var(--clr-purple)";
-
-  const picture = document.getElementById(`${modeId}-picture`);
-  picture.style.filter = "grayscale(0)";
 }

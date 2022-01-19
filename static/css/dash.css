@@ -72,7 +72,7 @@
   margin-left: -1rem;
 }
 
-#mode-selector-div {
+#doc-selector-div {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -81,11 +81,11 @@
   width: 50rem;
 }
 
-#mode-selector-div > .mode-item  {
+#doc-selector-div > .mode-item  {
   margin-bottom: 1.7rem;
 }
 
-#mode-selector-div > :last-child {
+#doc-selector-div > :last-child {
   margin-bottom: 0;
 }
 
@@ -116,7 +116,7 @@
     padding: 0.5rem;
   }
 
-  #mode-selector-div {
+  #doc-selector-div {
     width: 100%;
   }
 

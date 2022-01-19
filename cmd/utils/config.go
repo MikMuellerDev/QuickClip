@@ -14,11 +14,6 @@ type Config struct {
 	InstanceName string
 }
 
-type User struct {
-	Name     string
-	Password string
-}
-
 var config Config
 
 func ReadConfigFile() {

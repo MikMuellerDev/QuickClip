@@ -1,9 +1,18 @@
 {
     "Clips": [
         {
-            "Id": "id",
-            "Name": "My Board",
-            "Content": "CONTENT"
+            "Name": "My Document",
+            "Id": "0",
+            "Content": "Write something...",
+            "Description": "This is an example for a restricted clipboard.",
+            "Restricted": true
+        },
+        {
+            "Name": "Our Document",
+            "Id": "1",
+            "Content": "Write something...",
+            "Description": "This is an example for an unprotected clipboard.",
+            "Restricted": false
         }
     ]
 }

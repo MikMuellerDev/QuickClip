@@ -1,26 +1,54 @@
 async function setCurrentMode(id) {
-  const res = await fetch(`/api/mode/${id}`, {
-    method: "post",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  });
-  const response = await res.json();
-  return response;
+  const res = await fetch(`/api/mode/${id}`, { method: "post" });
+  return await res.json();
 }
 
-async function getAvailableModes() {
-  const url = "/api/mode/list";
+async function getDocuments() {
+  const url = "/api/clips";
   const res = await fetch(url);
-  return (await res.json())["Modes"];
+  return (await res.json())["Clips"];
 }
 
-async function getCurrentMode(useKeepalive) {
-  let url = "/api/mode";
+async function getDocumentById(id, useKeepalive) {
+  let url = `/api/clip/${id}`;
   if (useKeepalive) {
-    url = "/api/mode/keepalive";
+    url = `/api/clip/refresh/${id}`;
   }
   const res = await fetch(url);
-  return (await res.json())["Mode"];
+  return await res.json();
+}
+
+async function getUserStatus() {
+  let url = `/api/user`;
+  const res = await fetch(url);
+  return await res.json();
+}
+
+async function textInput(id, content) {
+  const url = `/api/clips/edit/${id}`;
+  const cont = { Content: content }
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(cont)
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
+
+async function requestSave() {
+  const url = '/api/save';
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+
+  const data = await res.json();
+  console.log(data);
 }
