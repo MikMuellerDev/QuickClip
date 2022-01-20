@@ -7,11 +7,13 @@ import (
 )
 
 type Clip struct {
-	Name        string
-	Id          string
-	Content     string
-	Description string
-	Restricted  bool
+	Name            string
+	Id              string
+	Content         string
+	Description     string
+	Restricted      bool
+	Refresh         bool
+	RefreshInterval int
 }
 
 type Clips struct {
@@ -43,7 +45,7 @@ func ReadClipFile() {
 func GetClips(username string) Clips {
 	var clipsCpy Clips
 	for _, v := range clips.Clips {
-		var clip = Clip{Name: v.Name, Id: v.Id, Content: "", Restricted: v.Restricted, Description: v.Description}
+		var clip = Clip{Name: v.Name, Id: v.Id, Content: "", Restricted: v.Restricted, Description: v.Description, Refresh: v.Refresh, RefreshInterval: v.RefreshInterval}
 		if v.Restricted {
 			if HasPermission(username, v.Id) || username == "admin" {
 				clipsCpy.Clips = append(clipsCpy.Clips, clip)
@@ -73,7 +75,7 @@ func GetClipById(id string, user string) (bool, Clip) {
 					return true, v
 				} else {
 					log.Warn(fmt.Sprintf("User: %s requested restricted board: %s", user, id))
-					return false, Clip{"", "", "", "", false}
+					return false, Clip{"", "", "", "", false, false, -1}
 				}
 			} else {
 				return true, v
@@ -81,14 +83,14 @@ func GetClipById(id string, user string) (bool, Clip) {
 		}
 	}
 	log.Error(fmt.Sprintf("Requested board that does not exist: %s, DoesBoardExist() might have failed.", id))
-	return false, Clip{"", "", "", "", false}
+	return false, Clip{"", "", "", "", false, false, -1}
 }
 
 func ModClipInList(clip Clip) {
 	var clipsCpy []Clip
 	for _, v := range clips.Clips {
 		if v.Id == clip.Id {
-			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Description: clip.Description, Restricted: clip.Restricted})
+			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Description: clip.Description, Restricted: clip.Restricted, Refresh: clip.Refresh, RefreshInterval: clip.RefreshInterval})
 		} else {
 			clipsCpy = append(clipsCpy, v)
 		}
@@ -117,7 +119,7 @@ func ModClip(clip Clip) (bool, Clip) {
 	if DoesClipExist(clip.Id) {
 		ModClipInList(clip)
 		writeClips(clips)
-		return true, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Restricted: clip.Restricted}
+		return true, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Restricted: clip.Restricted, Refresh: clip.Refresh, RefreshInterval: clip.RefreshInterval}
 	} else {
 		log.Warn(fmt.Sprintf("The Clip ID: %s does not exist.", clip.Id))
 	}
@@ -134,6 +136,9 @@ func writeClips(clips Clips) {
 	clipJson, _ := json.Marshal(clips)
 	prevSave = clipJson
 	err = ioutil.WriteFile("../config/clipboard.json", clipJson, 0644)
+	if err != nil {
+		log.Fatal("Error writing clipboard: %s", err.Error())
+	}
 	log.Debug("Written clip contents to clipboard.json.")
 }
 
@@ -171,7 +176,7 @@ func EditClip(id string, content string, user string) bool {
 	for _, v := range clips.Clips {
 		if v.Id == id {
 			lenBefore = len(v.Content)
-			clipsCpy = append(clipsCpy, Clip{Name: v.Name, Id: v.Id, Content: content, Description: v.Description, Restricted: v.Restricted})
+			clipsCpy = append(clipsCpy, Clip{Name: v.Name, Id: v.Id, Content: content, Description: v.Description, Restricted: v.Restricted, Refresh: v.Refresh, RefreshInterval: v.RefreshInterval})
 		} else {
 			clipsCpy = append(clipsCpy, v)
 		}

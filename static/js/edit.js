@@ -8,6 +8,7 @@ function setTitle(doc) {
 function registerTypeEvents(doc) {
   const textArea = document.getElementById("clip");
   textArea.oninput = async () => {
+    setWordCount(textArea.value);
     if (!spinnerLock) {
       spinnerLock = true;
       startSpinner("edit-spinner");
@@ -27,13 +28,18 @@ function setText(doc) {
   textArea.value = doc.Content;
 }
 
-async function mainloop(id) {
+function setWordCount(text) {
+  const len = text.length;
+  document.getElementById("wordcount").innerText = `${len} chars, words`;
+}
+
+async function refresh(id, timeout) {
   const doc = await getDocumentById(id, true);
   setText(doc);
 
   setTimeout(async () => {
-    await mainloop(id);
-  }, 100);
+    await refresh(id);
+  }, timeout);
 }
 
 async function quitSave() {
@@ -62,7 +68,19 @@ window.onload = async () => {
     const version = await getVersion();
     setVersion(version.Version, version.Production);
 
-    mainloop(id).then();
+    if (doc.Refresh) {
+      document.getElementById("refreshIndicator").innerText = "(live)";
+      console.log(
+        `%cThis document supports live-editing @${
+          doc.RefreshInterval / 1000
+        } refresh / sec.`,
+        "color:green"
+      );
+      refresh(id, doc.RefreshInterval).then();
+    } else {
+      document.getElementById("refreshIndicator").innerText = "(static)";
+      console.log(`%cThis document is static.`, "color:red");
+    }
   } catch (err) {
     textArea.value = `An error occurred, unable to fetch content: ${err}`;
   }
