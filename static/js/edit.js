@@ -30,13 +30,7 @@ function setText(doc) {
 
 function setWordCount(text) {
   const len = text.length;
-  let words = text.split(' ').length
-  if (len == 0) {
-    words = 0
-  }
-
-  document.getElementById("wordcount").innerText = `${words}`;
-  document.getElementById("charcount").innerText = `${len}`;
+  document.getElementById("wordcount").innerText = `${len} chars, words`;
 }
 
 async function refresh(id, timeout) {
@@ -74,10 +68,8 @@ window.onload = async () => {
     const version = await getVersion();
     setVersion(version.Version, version.Production);
 
-    setWordCount(doc.Content)
-
     if (doc.Refresh) {
-      document.getElementById("refreshIndicator").innerHTML = "<span>syncronized</span> <img id='syncSymbol' src='/static/media/sync.png'>";
+      document.getElementById("refreshIndicator").innerText = "(live)";
       console.log(
         `%cThis document supports live-editing @${
           doc.RefreshInterval / 1000
@@ -86,7 +78,7 @@ window.onload = async () => {
       );
       refresh(id, doc.RefreshInterval).then();
     } else {
-      document.getElementById("refreshIndicator").innerHTML = "<span>not syncronized</span> <img id='syncSymbol' src='/static/media/nosync.png'>";
+      document.getElementById("refreshIndicator").innerText = "(static)";
       console.log(`%cThis document is static.`, "color:red");
     }
   } catch (err) {

@@ -1,18 +1,22 @@
 {
     "port": 8081,
     "version": "0.3.0-Beta",
-    "production": true,
+    "production": false,
     "instanceName": "QuickClip",
     "users": [
         {
             "name": "admin",
             "password": "password",
-            "permissions": ["*"]
+            "permissions": [
+                "*"
+            ]
         },
         {
             "name": "testuser",
             "password": "password",
-            "permissions": ["0"]
+            "permissions": [
+                "0"
+            ]
         }
     ]
 }
