@@ -1,20 +1,15 @@
 /* Overlay */
 .edit-overlay {
+  position: absolute;
   background-color: #404040;
-  /* z-index: 1; */
   height: 20rem;
   width: 40rem;
-  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  border-radius: 0.3rem;
-  flex-wrap: wrap;
+  border-radius: 0.4rem;
   flex-direction: column;
-  align-content: flex-start;
-  justify-content: flex-start;
-  align-items: flex-start;
   padding: 1.2rem;
 }
 
@@ -23,5 +18,28 @@
 }
 
 .edit-overlay-description {
+  margin-top: 1rem;
+  margin-left: 0.1rem;
   color: #bbbbbb;
+}
+
+.edit-overlay-inputs {
+  margin-top: 2rem;
+  width: 50%;
+  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-overlay-buttons {
+  margin-top: 2rem;
+  width: 20%;
+  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-overlay-main-div {
+  display: flex;
+  justify-content: space-evenly;
 }
