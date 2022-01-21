@@ -1,4 +1,4 @@
-/* #dash-body {
+#dash-body {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -81,7 +81,7 @@
   width: 50rem;
 }
 
-#doc-selector-div > .mode-item  {
+#doc-selector-div > .mode-item {
   margin-bottom: 1.7rem;
 }
 
@@ -106,9 +106,9 @@
   flex-direction: row;
   gap: 0.5rem;
   justify-content: space-evenly;
-} */
+}
 
-/* @media (max-width: 47.5rem) {
+@media (max-width: 47.5rem) {
   .mode-item {
     width: 85%;
     height: 4rem;
@@ -138,4 +138,4 @@
   nav {
     height: 40px;
   }
-} */
+}

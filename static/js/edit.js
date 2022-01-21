@@ -30,7 +30,13 @@ function setText(doc) {
 
 function setWordCount(text) {
   const len = text.length;
-  document.getElementById("wordcount").innerText = `${len} chars, words`;
+  let words = text.split(" ").length;
+  if (len == 0) {
+    words = 0;
+  }
+
+  document.getElementById("wordcount").innerText = `${words}`;
+  document.getElementById("charcount").innerText = `${len}`;
 }
 
 async function refresh(id, timeout) {
@@ -68,17 +74,31 @@ window.onload = async () => {
     const version = await getVersion();
     setVersion(version.Version, version.Production);
 
+    // if (doc.Refresh) {
+    //   document.getElementById("refreshIndicator").innerText = "(live)";
+    //   console.log(
+    //     `%cThis document supports live-editing @${
+    //       doc.RefreshInterval / 1000
+    //     } refresh / sec.`,
+    //     "color:green"
+    //   );
+    //   refresh(id, doc.RefreshInterval).then();
+    // } else {
+    //   document.getElementById("refreshIndicator").innerText = "(static)";
+    //   console.log(`%cThis document is static.`, "color:red");
+    // }
     if (doc.Refresh) {
       document.getElementById("refreshIndicator").innerText = "(live)";
+      document.getElementById("refreshIndicator").innerHTML =
+        "<span>syncronized</span> <img id='syncSymbol' src='/static/media/sync.png'>";
       console.log(
-        `%cThis document supports live-editing @${
-          doc.RefreshInterval / 1000
-        } refresh / sec.`,
-        "color:green"
+        `%cThis document supports live-editing @ ${doc.RefreshInterval / 1000}`
       );
       refresh(id, doc.RefreshInterval).then();
     } else {
       document.getElementById("refreshIndicator").innerText = "(static)";
+      document.getElementById("refreshIndicator").innerHTML =
+        "<span>not syncronized</span> <img id='syncSymbol' src='/static/media/nosync.png'>";
       console.log(`%cThis document is static.`, "color:red");
     }
   } catch (err) {

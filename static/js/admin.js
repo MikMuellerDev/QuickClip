@@ -5,6 +5,7 @@
 
 window.onload = async function () {
   console.log("IT WORKS");
-  const pop = newPopup("myPop");
-  showPopup("myPop");
+  const documents = await getDocuments();
+  const pop = newPopup(documents[0]);
+  showPopup(documents[0].Id);
 };

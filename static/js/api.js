@@ -26,27 +26,54 @@ async function getUserStatus() {
 
 async function textInput(id, content) {
   const url = `/api/clips/edit/${id}`;
-  const cont = { Content: content }
+  const cont = { Content: content };
   const res = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(cont)
+    body: JSON.stringify(cont),
   });
 
   const data = await res.json();
   console.log(data);
 }
 
+async function modifyClip(obj) {
+  const url = `/api/clips/update`;
 
-async function requestSave() {
-  const url = '/api/save';
   const res = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-    }
+    },
+    body: JSON.stringify(obj),
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
+async function deleteClip(id) {
+  const url = `/api/clips/update/${id}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
+async function requestSave() {
+  const url = "/api/save";
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
   const data = await res.json();

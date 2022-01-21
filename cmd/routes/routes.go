@@ -34,7 +34,7 @@ func NewRouter() *mux.Router {
 
 	r.HandleFunc("/api/clips/update/{id}", middleware.ApiAuthRequired(middleware.LogRequest(removeClip))).Methods("DELETE")
 	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(editClip)).Methods("PUT")
-	r.HandleFunc("/api/clips/update", middleware.ApiAuthRequired(middleware.LogRequest(modClip))).Methods("POST")
+	r.HandleFunc("/api/clips/update", middleware.ApiAuthRequired(middleware.LogRequest(modClip))).Methods("PUT")
 	r.HandleFunc("/api/clips/add", middleware.ApiAuthRequired(middleware.LogRequest(addClip))).Methods("POST")
 
 	r.HandleFunc("/login", middleware.LogRequest(loginGetHandler)).Methods("GET")

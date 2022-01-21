@@ -16,7 +16,6 @@
 }
 
 #login-form {
-  /* Align all input fields and buttons to the center */
   display: flex;
   justify-content: center;
   align-items: center;
