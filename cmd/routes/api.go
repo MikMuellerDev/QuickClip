@@ -147,6 +147,23 @@ func removeClip(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Clip with ID: %s was removed.", id)})
 }
 
+func probeWriteAccess(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	_, user := getUser(r)
+
+	_, clip := utils.GetClipById(id, user)
+	if clip.ReadOnly {
+		if !utils.HasWritePermission(user, id) {
+			json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Read Only", fmt.Sprintf("[PROBE] The ID: %s is set to read-only.", id)})
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(ResponseStruct{true, 200, "Write allowed", fmt.Sprintf("[PROBE] Your user is allowed to write to: %s", id)})
+}
+
 func editClip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -169,6 +186,15 @@ func editClip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, user := getUser(r)
+
+	_, clip := utils.GetClipById(id, user)
+	if clip.ReadOnly {
+		if !utils.HasWritePermission(user, id) {
+			json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Read Only", fmt.Sprintf("The ID: %s is set to read-only.", id)})
+			return
+		}
+	}
+
 	success := utils.EditClip(id, req.Content, user)
 
 	if success {

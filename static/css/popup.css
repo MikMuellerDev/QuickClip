@@ -23,20 +23,20 @@
   color: #bbbbbb;
 }
 
-.edit-overlay-inputs {
+.edit-overlay-inputs,
+.edit-overlay-buttons {
   margin-top: 2rem;
-  width: 50%;
   gap: 1rem;
   display: flex;
   flex-direction: column;
 }
 
+.edit-overlay-inputs {
+  width: 50%;
+}
+
 .edit-overlay-buttons {
-  margin-top: 2rem;
   width: 20%;
-  gap: 1rem;
-  display: flex;
-  flex-direction: column;
 }
 
 .edit-overlay-main-div {

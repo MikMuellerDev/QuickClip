@@ -1,3 +1,10 @@
+#main-body,
+#main-body-navbar {
+  display: flex;
+  align-items: center;
+  align-content: center;
+}
+
 #dash-body {
   display: flex;
   flex-direction: column;
@@ -9,22 +16,17 @@
 }
 
 #main-body {
-  display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  align-items: center;
-  align-content: center;
   justify-content: flex-start;
 }
 
 #main-body-navbar {
-  display: flex;
+  width: 50%;
   flex-direction: row;
   justify-content: space-between;
-  width: 50%;
   flex-wrap: wrap;
-  align-content: center;
   align-items: center;
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -71,19 +73,19 @@
   align-items: center;
 }
 
-#wordcount-div {
+#wordcount-div,
+#right-footer-div {
   color: white;
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   font-weight: 400;
 }
 
-#wordcount {
-  font-family: monospace;
-  background-color: #181818;
-  padding: 0.1rem 0.6rem;
-  border-radius: 0.3rem;
+#right-footer-div {
+  display: flex;
+  gap: 1rem;
 }
 
+#wordcount,
 #charcount {
   font-family: monospace;
   background-color: #181818;
@@ -95,7 +97,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: .3rem;
+  gap: 0.3rem;
 }
 
 #syncSymbol {

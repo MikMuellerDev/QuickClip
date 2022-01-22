@@ -22,6 +22,7 @@ func main() {
 	log.Debug("All loggers initialized.")
 
 	config := utils.GetConfig()
+	config.Version = "0.4.0-beta"
 	r := routes.NewRouter()
 	utils.ReadClipFile()
 	utils.ReadConfigFile()
@@ -30,6 +31,6 @@ func main() {
 	sessions.Init(config.Production)
 	templates.LoadTemplates("../templates/*.html")
 	http.Handle("/", r)
-	log.Info(fmt.Sprintf("\x1b[34mQuickClip [%s] is running on http://localhost:%d", config.InstanceName, config.Port))
+	log.Info(fmt.Sprintf("\x1b[34mQuickClip [Version %s] [%s] is running on http://localhost:%d", config.Version, config.InstanceName, config.Port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil))
 }

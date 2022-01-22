@@ -1,72 +1,71 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>QuickClip</title>
-    <meta charset="UTF-8" />
-    <link rel="manifest" href="/static/manifest.webmanifest" />
-    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/static/media/product/favicon.png"
-    />
 
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/navbar.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/elevations.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/button.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/edit.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/spinner.css" />
+<head>
+  <title>QuickClip</title>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <link rel="icon" type="image/x-icon" href="/static/media/product/favicon.png" />
 
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/version.js"></script>
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/spinner.js"></script>
-    <script src="/static/js/edit.js"></script>
-  </head>
+  <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/navbar.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/elevations.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/button.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/edit.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/spinner.css" />
 
-  <body>
-    <nav id="navbar">
-      <div id="navbar-left">
-        <div id="application-name">
-          <h2>QuickClip</h2>
+  <script src="/static/js/utils.js"></script>
+  <script src="/static/js/version.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/spinner.js"></script>
+  <script src="/static/js/edit.js"></script>
+</head>
+
+<body>
+  <nav id="navbar">
+    <div id="navbar-left">
+      <div id="application-name">
+        <h2>QuickClip</h2>
+      </div>
+      <div id="application-version">
+        <span id="navbar-application-version"></span>
+        <span id="navbar-application-production"></span>
+      </div>
+    </div>
+  </nav>
+  <div id="dash-body">
+    <div id="main-body">
+      <div id="main-body-navbar">
+        <div id="navbar-left">
+          <h2 id="title">Editing ...</h2>
+          <div class="spinner" id="edit-spinner"></div>
         </div>
-        <div id="application-version">
-          <span id="navbar-application-version"></span>
-          <span id="navbar-application-production"></span>
+        <div id="main-body-navbar-button-div">
+          <button class="button" id="copy-button" onclick="copyText()">
+            <a>copy text</a>
+          </button>
+          <button class="button"  onclick="quitSave().then()">
+            <a>save & quit</a>
+          </button>
         </div>
       </div>
-    </nav>
-    <div id="dash-body">
-      <div id="main-body">
-        <div id="main-body-navbar">
-          <div id="navbar-left">
-            <h2 id="title">Editing ...</h2>
-            <div class="spinner" id="edit-spinner"></div>
-          </div>
-          <div id="main-body-navbar-button-div">
-            <button
-              class="button"
-              id="login-button"
-              type="submit"
-              onclick="quitSave().then()"
-            >
-              <a>save & quit</a>
-            </button>
-          </div>
+      <textarea id="clip" maxlength="500000"></textarea>
+      <div id="bottomFooter">
+        <div id="wordcount-div">
+          <span id="wordcount"></span>
+          words,
+          <span id="charcount"></span>
+          chars
         </div>
-        <textarea id="clip" maxlength="500000"></textarea>
-        <div id="bottomFooter">
-          <div id="wordcount-div">
-            <span id="wordcount"></span>
-            words,
-            <span id="charcount"></span>
-            chars
-          </div>
+        <div id="right-footer-div">
+          <span id="readOnlyIndicator"></span>
           <span id="refreshIndicator"></span>
         </div>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>

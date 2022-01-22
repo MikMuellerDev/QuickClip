@@ -9,6 +9,12 @@ async function getDocuments() {
   return (await res.json())["Clips"];
 }
 
+async function probeWriteAccess(id) {
+  const url = `/api/clip/probe/${id}`;
+  const res = await fetch(url);
+  return (await res.json()) ["Success"];
+}
+
 async function getDocumentById(id, useKeepalive) {
   let url = `/api/clip/${id}`;
   if (useKeepalive) {
@@ -36,7 +42,7 @@ async function textInput(id, content) {
   });
 
   const data = await res.json();
-  console.log(data);
+  console.log(`Write successful: ${data.Success}`);
 }
 
 async function modifyClip(obj) {

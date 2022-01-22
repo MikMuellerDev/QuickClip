@@ -40,9 +40,6 @@ function newPopup(doc) {
 
   const title = document.createElement("h2");
 
-  // const description = document.createElement("span");
-  // description.className = "edit-overlay-description";
-
   const description = createSpan("edit-overlay-description");
 
   const mainDiv = document.createElement("div");

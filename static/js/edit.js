@@ -44,7 +44,7 @@ async function refresh(id, timeout) {
   setText(doc);
 
   setTimeout(async () => {
-    await refresh(id);
+    await refresh(id, timeout);
   }, timeout);
 }
 
@@ -55,6 +55,32 @@ async function quitSave() {
   }
   await requestSave();
   window.location.href = "/dash";
+}
+
+function copyText() {
+  const textArea = document.getElementById('clip')
+  textArea.select()
+  textArea.setSelectionRange(0, 99999)
+  document.execCommand('copy')
+  textArea.blur()
+}
+
+async function setWriteMode(doc) {
+  if (doc.ReadOnly) {
+    console.log("This document is read-only.");
+    const success = await probeWriteAccess(doc.Id);
+    if (success) {
+      console.log("[PROBE] Write allowed.");
+      document.getElementById("readOnlyIndicator").innerText = ""
+    } else {
+      console.log("[PROBE] Write forbidden.");
+      const clip = document.getElementById("clip");
+      clip.disabled = true;
+      document.getElementById("readOnlyIndicator").innerText = "read-only"
+      return
+    }
+  }
+  registerTypeEvents(doc);
 }
 
 window.onload = async () => {
@@ -68,37 +94,29 @@ window.onload = async () => {
     const doc = await getDocumentById(id);
     setText(doc);
 
-    registerTypeEvents(doc);
+    setWriteMode(doc)
+
     setTitle(doc);
 
     const version = await getVersion();
     setVersion(version.Version, version.Production);
 
-    // if (doc.Refresh) {
-    //   document.getElementById("refreshIndicator").innerText = "(live)";
-    //   console.log(
-    //     `%cThis document supports live-editing @${
-    //       doc.RefreshInterval / 1000
-    //     } refresh / sec.`,
-    //     "color:green"
-    //   );
-    //   refresh(id, doc.RefreshInterval).then();
-    // } else {
-    //   document.getElementById("refreshIndicator").innerText = "(static)";
-    //   console.log(`%cThis document is static.`, "color:red");
-    // }
+    setWordCount(doc.Content);
+
     if (doc.Refresh) {
       document.getElementById("refreshIndicator").innerText = "(live)";
-      document.getElementById("refreshIndicator").innerHTML =
-        "<span>syncronized</span> <img id='syncSymbol' src='/static/media/sync.png'>";
+      document.getElementById(
+        "refreshIndicator"
+      ).innerHTML = `<span>synchronized ${doc.RefreshInterval}ms  </span> <img id='syncSymbol' src='/static/media/sync.png'>`;
       console.log(
-        `%cThis document supports live-editing @ ${doc.RefreshInterval / 1000}`
+        `%cThis document supports live-editing @ ${doc.RefreshInterval / 1000}`,
+        "color:cyan"
       );
       refresh(id, doc.RefreshInterval).then();
     } else {
       document.getElementById("refreshIndicator").innerText = "(static)";
       document.getElementById("refreshIndicator").innerHTML =
-        "<span>not syncronized</span> <img id='syncSymbol' src='/static/media/nosync.png'>";
+        "<span>not synchronized</span> <img id='syncSymbol' src='/static/media/syncoff.png'>";
       console.log(`%cThis document is static.`, "color:red");
     }
   } catch (err) {
