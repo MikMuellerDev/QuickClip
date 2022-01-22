@@ -12,4 +12,4 @@ cd QuickClip
 ```
 make
 ```
-Your custom-built executable can now be found in `.//build/QuicklipX.X.X`.
+Your custom-built executable can now be found in `./build/QuicklipX.X.X`.
