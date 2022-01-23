@@ -36,6 +36,7 @@
   transition: 0.4s;
   opacity: 0;
   user-select: none;
+  cursor: pointer;
 }
 
 .node-item-left {
@@ -70,6 +71,7 @@
   justify-content: center;
   align-items: flex-start;
   width: 50rem;
+  transition: .4s;
 }
 
 #doc-selector-div > .mode-item {
@@ -109,7 +111,7 @@
   }
 
   #main-body-navbar {
-    margin: 1rem 0;
+    margin: 1 0;
     width: 90%;
   }
 

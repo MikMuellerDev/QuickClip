@@ -25,4 +25,8 @@ nav {
   nav {
     height: 40px;
   }
+
+  #navbar-application-version {
+    font-size: .5rem;
+  }
 }

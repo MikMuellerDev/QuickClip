@@ -1,12 +1,14 @@
 function setButtonText(loggedIn) {
-  const button = document.getElementById("loggout-button");
+  const button = document.getElementById("logout-button");
+  const buttonLabel = document.getElementById("logout-button-text");
+
   if (loggedIn) {
-    button.innerText = "logout";
+    buttonLabel.innerText = "logout";
     button.onclick = () => {
       window.location.href = "/logout";
     };
   } else {
-    button.innerText = "login";
+    buttonLabel.innerText = "login";
     button.onclick = () => {
       window.location.href = "/login";
     };

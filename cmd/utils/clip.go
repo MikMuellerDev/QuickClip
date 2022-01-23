@@ -100,10 +100,11 @@ func ModClipInList(clip Clip) {
 }
 
 func RemoveClip(id string) {
+	fmt.Printf("Removing clip with id: %s\n", id)
 	var clipsCpy []Clip
-	_, clip := GetClipById(id, "admin")
+	// _, clip := GetClipById(id, "admin")
 	for _, v := range clips.Clips {
-		if id != clip.Id {
+		if id != v.Id {
 			clipsCpy = append(clipsCpy, v)
 		}
 	}

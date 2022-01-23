@@ -1,1 +1,14 @@
-{"Clips":[{"Name":"My Document","Id":"demo","Content":"Write something..","Description":"This is an example for an unprotected clipboard.","Restricted":false,"Refresh":true,"RefreshInterval":500,"ReadOnly":true}]}
+{
+    "Clips": [
+        {
+            "Name": "Test Document",
+            "Id": "my-unique-id",
+            "Content": "",
+            "Description": "Test Document's description",
+            "Restricted": false,
+            "Refresh": false,
+            "RefreshInterval": 0,
+            "ReadOnly": false
+        }
+    ]
+}

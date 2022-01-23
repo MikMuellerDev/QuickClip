@@ -15,3 +15,4 @@ bin
 build
 *.log
 log/error.log
+RELEASENOTES.md

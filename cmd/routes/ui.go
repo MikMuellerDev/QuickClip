@@ -50,6 +50,11 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["valid"] = true
 		session.Values["username"] = username
 		session.Save(r, w)
+
+		if username == "admin" {
+			http.Redirect(w, r, "/admin", http.StatusFound)
+			return
+		}
 		http.Redirect(w, r, "/dash", http.StatusFound)
 	} else {
 		templates.ExecuteTemplate(w, "login.html", http.StatusForbidden)

@@ -60,6 +60,21 @@ async function modifyClip(obj) {
   console.log(data);
 }
 
+async function createClip(obj) {
+  const url = `/api/clips/add`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(obj),
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
 async function deleteClip(id) {
   const url = `/api/clips/update/${id}`;
   const res = await fetch(url, {

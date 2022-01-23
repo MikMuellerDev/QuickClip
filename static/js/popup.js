@@ -23,27 +23,40 @@ function createSpan(label, className) {
   return span;
 }
 
-function deleteHandler(id) {
+async function deleteHandler(id) {
   console.log(`DELETE: ${id}`);
-  deleteClip(id);
+  await deleteClip(id);
 }
 
-function modifyHandler(obj) {
+async function modifyHandler(obj) {
   console.log(`MODIFY: ${obj.Name}`);
-  modifyClip(obj);
+  await modifyClip(obj);
 }
 
-function newPopup(doc) {
+function newPopup(doc, create) {
+  let descriptionTextPrev;
+
   const main = document.createElement("div");
   main.className = "edit-overlay";
-  main.id = doc.id;
+  main.id = doc.Id;
 
   const title = document.createElement("h2");
+  title.innerText = doc.Name;
+  title.className = "popup-doc-title";
+
+  const idTitle = document.createElement("h3");
+  idTitle.innerText = `ID: ${doc.Id}`;
+  idTitle.className = "popup-doc-id";
 
   const description = createSpan("edit-overlay-description");
+  description.innerText = doc.Description;
+  description.className = "popup-doc-description";
 
   const mainDiv = document.createElement("div");
   mainDiv.className = "edit-overlay-main-div";
+
+  const sliderDiv = document.createElement("div");
+  sliderDiv.className = "edit-overlay-slider-div";
 
   const inputDiv = document.createElement("div");
   inputDiv.className = "edit-overlay-inputs";
@@ -59,41 +72,127 @@ function newPopup(doc) {
     "Refresh Interval"
   );
 
+  const idInput = createInput(doc.Id, "unique ID");
+
   const descriptionInput = createInput(doc.Description, "Description");
   const nameInput = createInput(doc.Name, "Name");
   const deleteButton = createButton("delete");
-  const saveButton = createButton("save");
+  deleteButton.style.backgroundColor = "var(--clr-error)";
+
+  let saveButton;
+
+  if (create) {
+    saveButton = createButton("create");
+  } else {
+    saveButton = createButton("save");
+  }
+
   const cancelButton = createButton("cancel");
 
-  const nameSpan = createSpan("Name", "");
-  const descriptionSpan = createSpan("Description", "");
-  const refreshSpan = createSpan("Refresh Interval", "");
+  const nameSpan = createSpan("Name:", "");
+  const descriptionSpan = createSpan("Description:", "");
+  const refreshSpan = createSpan("Refresh Interval:", "");
+  const idSpan = createSpan("unique ID:", "");
 
-  deleteButton.onclick = () => {
-    deleteHandler(doc.Id);
+  labelDiv.appendChild(nameSpan);
+  labelDiv.appendChild(descriptionSpan);
+  labelDiv.appendChild(refreshSpan);
+
+  nameInput.oninput = () => {
+    title.innerText = nameInput.value;
   };
 
-  saveButton.onclick = () => {
-    modifyHandler({
-      Id: doc.Id,
-      Name: nameInput.value,
-      Description: descriptionInput.value,
-      RefreshInterval: parseInt(refreshIntervalInput.value),
-      Refresh: true,
-      Restricted: false,
-    });
+  descriptionInput.oninput = () => {
+    console.log(descriptionInput.value.length);
+    if (descriptionInput.value.length === 0) {
+      description.innerText = doc.Name;
+    } else if (descriptionInput.value.length < 34) {
+      description.innerText = descriptionInput.value;
+      descriptionTextPrev = descriptionInput.value;
+    } else {
+      descriptionInput.value = descriptionTextPrev;
+    }
   };
 
-  description.innerText = "TEST";
-  title.innerText = "TEST";
+  deleteButton.onclick = async () => {
+    const confirm = prompt("Enter `yes` to confirm deletion", "");
+    if (confirm == "yes") {
+      await deleteHandler(doc.Id);
+      removeDocuments();
+      const documents = await getDocuments();
+      if (documents !== null) addDocuments(documents, true);
+    }
+    setTimeout(() => {
+      main.remove();
+    }, 600);
+    hidePopup(doc.Id);
+  };
+
+  saveButton.onclick = async () => {
+    if (!create) {
+      await modifyHandler({
+        Id: doc.Id,
+        Name: nameInput.value,
+        Description: descriptionInput.value,
+        RefreshInterval: parseInt(refreshIntervalInput.value),
+        Refresh: doc.Refresh,
+        ReadOnly: doc.ReadOnly,
+        Restricted: doc.Restricted,
+      });
+    } else {
+      const tempDocs = await getDocuments();
+
+      if (tempDocs != null) {
+        for (let iterDoc of tempDocs) {
+          if (iterDoc.Id == idInput.value) {
+            saveButton.style.backgroundColor = "var(--clr-error)";
+            alert("This ID already exists.");
+            return;
+          }
+        }
+      }
+
+      await createClip({
+        Id: idInput.value.replaceAll(" ", "-"),
+        Name: nameInput.value,
+        Description: descriptionInput.value,
+        RefreshInterval: parseInt(refreshIntervalInput.value),
+        Refresh: doc.Refresh,
+        ReadOnly: doc.ReadOnly,
+        Restricted: doc.Restricted,
+      });
+    }
+
+    hidePopup(doc.Id);
+    setTimeout(() => {
+      main.remove();
+    }, 600);
+
+    removeDocuments();
+    addDocuments(await getDocuments(), true);
+  };
+
+  cancelButton.onclick = () => {
+    hidePopup(doc.Id);
+    setTimeout(() => {
+      main.remove();
+    }, 600);
+  };
 
   main.appendChild(title);
   main.appendChild(description);
+  main.appendChild(idTitle);
   inputDiv.appendChild(nameInput);
   inputDiv.appendChild(descriptionInput);
   inputDiv.appendChild(refreshIntervalInput);
 
-  buttonsDiv.appendChild(deleteButton);
+  if (!create) {
+    buttonsDiv.appendChild(deleteButton);
+  } else {
+    inputDiv.appendChild(idInput);
+    labelDiv.appendChild(idSpan);
+  }
+
   buttonsDiv.appendChild(cancelButton);
   buttonsDiv.appendChild(saveButton);
 
@@ -101,17 +200,83 @@ function newPopup(doc) {
   mainDiv.appendChild(inputDiv);
   mainDiv.appendChild(buttonsDiv);
   main.appendChild(mainDiv);
+  main.appendChild(sliderDiv);
+  main.style.zIndex = -1000;
+  main.style.display = "none";
+
+  const docTraits = ["Restricted", "ReadOnly", "Refresh"];
+  for (let trait of docTraits) {
+    const traitSwitchArr = createSlider();
+    const traitSwitch = traitSwitchArr[0];
+    const traitSwitchListener = traitSwitchArr[1];
+
+    traitSwitchListener.checked = doc[trait];
+
+    traitSwitchListener.onchange = () => {
+      doc[trait] = traitSwitchListener.checked;
+      console.log(`Trait ${trait} changed to ${doc[trait]}`);
+    };
+
+    const switchContainer = document.createElement("div");
+    switchContainer.className = "inner-slider-div";
+
+    const switchContainerSpan = document.createElement("span");
+    switchContainerSpan.innerText = trait;
+
+    switchContainer.appendChild(traitSwitch);
+    switchContainer.appendChild(switchContainerSpan);
+    sliderDiv.appendChild(switchContainer);
+  }
+
   document.getElementsByTagName("body")[0].appendChild(main);
 
   return main;
 }
 
 function showPopup(id) {
+  const allDocuments = document.getElementById("doc-selector-div");
   const main = document.getElementById(id);
-  main.style.zIndex = "1000";
+  main.style.opacity = "0";
+  main.style.display = "flex";
+  setTimeout(() => {
+    main.style.opacity = "100%";
+    allDocuments.style.filter = "brightness(50%)";
+    main.style.zIndex = 1000;
+  }, 100);
 }
 
 function hidePopup(id) {
+  const allDocuments = document.getElementById("doc-selector-div");
+  allDocuments.zIndex = -2000;
   const main = document.getElementById(id);
-  main.style.zIndex = "0";
+
+  main.style.opacity = "0%";
+  main.style.transform = "translate(-50%, -50rem)";
+
+  setTimeout(() => {
+    main.style.display = "none";
+    allDocuments.style.filter = "brightness(100%)";
+    main.style.zIndex = -1000;
+    allDocuments.zIndex = 0;
+  }, 400);
+}
+
+function createSlider() {
+  let switchL;
+  let switchE;
+
+  switchE = document.createElement("input");
+
+  switchE.type = "checkbox";
+  switchE.checked = false;
+
+  const switchS = document.createElement("span");
+  switchS.className = "slider round sixDp";
+
+  switchL = document.createElement("label");
+  switchL.className = "switch";
+  switchL.appendChild(switchE);
+  switchL.appendChild(switchS);
+
+  return [switchL, switchE];
 }
