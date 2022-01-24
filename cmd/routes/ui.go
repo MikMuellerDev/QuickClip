@@ -10,25 +10,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// UI Pages
 func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dash", http.StatusFound)
 }
 
 func loginGetHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Store.Get(r, "session")
-	value, ok := session.Values["valid"]
-	value2, ok2 := session.Values["username"]
-	_, okParse2 := value2.(string)
-	valid, okParse := value.(bool)
-
-	log.Printf("username: %s, valid: %t\n", value2, valid)
-
-	if ok && ok2 && okParse2 && okParse && valid {
+	sessionValidTemp, sessionValidTempOk := session.Values["valid"]
+	sessionUsernameTemp, sessionUsernameTempOk := session.Values["username"]
+	_, sessionUsernameOk := sessionUsernameTemp.(string)
+	sessionValid, sessionValidOk := sessionValidTemp.(bool)
+	if sessionValidTempOk && sessionUsernameTempOk && sessionUsernameOk && sessionValidOk && sessionValid {
 		http.Redirect(w, r, "/dash", http.StatusFound)
 		return
 	}
-
 	templates.ExecuteTemplate(w, "login.html", http.StatusOK)
 }
 
@@ -44,7 +39,6 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
-
 	if middleware.TestCredentials(username, password, false) {
 		session, _ := sessions.Store.Get(r, "session")
 		session.Values["valid"] = true
@@ -77,12 +71,11 @@ func adminGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func editGetHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-
+	requestedId := vars["id"]
 	_, username := getUser(r)
-	if utils.DoesClipExist(id) {
-		if _, v := utils.GetClipById(id, "admin"); v.Restricted {
-			if utils.HasPermission(username, id) {
+	if utils.DoesClipExist(requestedId) {
+		if _, v := utils.GetClipById(requestedId, "admin"); v.Restricted {
+			if utils.HasPermission(username, requestedId) {
 				templates.ExecuteTemplate(w, "edit.html", http.StatusOK)
 				return
 			} else {

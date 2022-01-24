@@ -20,12 +20,12 @@ func StringWithCharset(length int, charset string) string {
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+	randomBytes := make([]byte, length)
+	for i := range randomBytes {
+		randomBytes[i] = charset[seededRand.Intn(len(charset))]
 	}
-	log.Trace(fmt.Sprintf("Generated random seed for sessions: %s", string(b)))
-	return string(b)
+	log.Trace(fmt.Sprintf("Generated random seed for sessions: %s", string(randomBytes)))
+	return string(randomBytes)
 }
 
 func Init(useRandomSeed bool) {
@@ -35,9 +35,9 @@ func Init(useRandomSeed bool) {
 	if useRandomSeed {
 		Store = sessions.NewCookieStore([]byte(StringWithCharset(40, charset)))
 	} else {
-		// By using a static sting like "", no login is required when restarting the server
+		// By using a static sting like "", no login is required when restarting the server in non-production mode
 		// The session encryption key is static, cookies stay valid
-		// If a logout is forced during development, turn on production mode
+		// If a logout should be enforced during development, enable production mode temporarily
 		log.Warn("\x1b[33mUsing a static string for session encryption. This is a security risk and should not be used in production.")
 		Store = sessions.NewCookieStore([]byte(""))
 	}

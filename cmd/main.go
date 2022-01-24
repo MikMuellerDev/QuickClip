@@ -19,10 +19,10 @@ func main() {
 	sessions.InitLogger(log)
 	templates.InitLogger(log)
 	utils.InitLogger(log)
-	log.Debug("All loggers initialized.")
+	log.Debug("Logging initialized.")
 
 	config := utils.GetConfig()
-	config.Version = "0.6.0"
+	config.Version = "0.6.1"
 	r := routes.NewRouter()
 	utils.ReadClipFile()
 	utils.ReadConfigFile()

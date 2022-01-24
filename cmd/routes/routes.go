@@ -43,10 +43,10 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/logout", middleware.LogRequest(logoutGetHandler)).Methods("GET")
 
 	filepath := "../static"
-	pathprefix := "/static/"
+	pathPrefix := "/static/"
 	fs := http.FileServer(http.Dir(filepath))
-	r.PathPrefix(pathprefix).Handler(http.StripPrefix(pathprefix, fs))
-	log.Debug(fmt.Sprintf("Initialized new FileServer for directory: %s. with replacement prefix: %s", filepath, pathprefix))
-	log.Debug("Initialized new router.")
+	r.PathPrefix(pathPrefix).Handler(http.StripPrefix(pathPrefix, fs))
+	log.Debug(fmt.Sprintf("Initialized FileServer for directory: %s. with replacement prefix: %s", filepath, pathPrefix))
+	log.Debug("Initialized Router.")
 	return r
 }

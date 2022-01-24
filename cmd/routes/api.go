@@ -12,32 +12,30 @@ import (
 )
 
 func getUser(r *http.Request) (bool, string) {
+	// Session doesn't require a password (ZKP)
 	session, _ := sessions.Store.Get(r, "session")
+	sessionUserTemp, _ := session.Values["username"]
+	sessionUser, okSessionUser := sessionUserTemp.(string)
 
 	query := r.URL.Query()
-	password := query.Get("password")
+	queryUser := query.Get("username")
+	queryPassword := query.Get("password")
 
-	uname2 := query.Get("username")
-	uname1, _ := session.Values["username"]
-	uname1Parsed, okParse := uname1.(string)
-
-	if okParse && utils.DoesUserExist(uname1Parsed) {
-		return true, uname1Parsed
-	} else if middleware.TestCredentials(uname2, password, true) {
-		return true, uname2
+	if okSessionUser && utils.DoesUserExist(sessionUser) {
+		return true, sessionUser
+	} else if middleware.TestCredentials(queryUser, queryPassword, true) {
+		return true, queryUser
 	} else {
 		return false, ""
 	}
 }
 
-// Returns the mode which is currently active
 func getVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	version, production := utils.GetVersion()
 	json.NewEncoder(w).Encode(VersionStruct{Version: version, Production: production})
 }
 
-// Returns the clip list
 func getClips(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_, username := getUser(r)
@@ -56,7 +54,6 @@ func saveToFile(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Returns Clip Based on Id
 func getClipById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -74,21 +71,22 @@ func getClipById(w http.ResponseWriter, r *http.Request) {
 func modClip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
-	var t utils.Clip
-	err := decoder.Decode(&t)
-	if err != nil {
-		log.Error(fmt.Sprintf("Invalid Request: %s", err.Error()))
+	var tempClip utils.Clip
+
+	requestError := decoder.Decode(&tempClip)
+	if requestError != nil {
+		log.Error(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a clip"})
 		return
 	}
 
 	_, user := getUser(r)
 	if user == "admin" {
-		success, clip := utils.ModClip(t)
+		success, clip := utils.ModClip(tempClip)
 		if success {
 			json.NewEncoder(w).Encode(clip)
 		} else {
-			json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", t.Id)})
+			json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", tempClip.Id)})
 		}
 	} else {
 		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Permission denied", "You mus be admin to edit clips."})
@@ -100,10 +98,10 @@ func addClip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 	var clip utils.Clip
-	err := decoder.Decode(&clip)
+	requestError := decoder.Decode(&clip)
 
-	if err != nil {
-		log.Warn(fmt.Sprintf("Invalid Request: %s", err.Error()))
+	if requestError != nil {
+		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a clip"})
 		return
 	}
@@ -131,20 +129,19 @@ func getApiUser(w http.ResponseWriter, r *http.Request) {
 func removeClip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	id := vars["id"]
-
+	requestedId := vars["id"]
 	_, user := getUser(r)
 	if user != "admin" {
 		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Permission denied", "You mus be admin to add clips."})
 	}
 
-	if !utils.DoesClipExist(id) {
-		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
+	if !utils.DoesClipExist(requestedId) {
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", requestedId)})
 		return
 
 	}
-	utils.RemoveClip(id)
-	json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Clip with ID: %s was removed.", id)})
+	utils.RemoveClip(requestedId)
+	json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Clip with ID: %s was removed.", requestedId)})
 }
 
 func probeWriteAccess(w http.ResponseWriter, r *http.Request) {
@@ -166,38 +163,36 @@ func probeWriteAccess(w http.ResponseWriter, r *http.Request) {
 
 func editClip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	decoder := json.NewDecoder(r.Body)
-	var req TextInput
-	err := decoder.Decode(&req)
+	var inputRequest TextInput
+	requestError := decoder.Decode(&inputRequest)
 
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	if err != nil {
-		log.Warn(fmt.Sprintf("Invalid Request: %s", err.Error()))
+	if requestError != nil {
+		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a TextInput"})
 		return
 	}
-
 	if !utils.DoesClipExist(id) {
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
 		return
 	}
 
 	_, user := getUser(r)
+	_, clipFromId := utils.GetClipById(id, user)
 
-	_, clip := utils.GetClipById(id, user)
-	if clip.ReadOnly {
+	if clipFromId.ReadOnly {
 		if !utils.HasWritePermission(user, id) {
 			json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Read Only", fmt.Sprintf("The ID: %s is set to read-only.", id)})
 			return
 		}
 	}
 
-	success := utils.EditClip(id, req.Content, user)
+	editSuccess := utils.EditClip(id, inputRequest.Content, user)
 
-	if success {
+	if editSuccess {
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "", Message: ""})
 	} else {
 		json.NewEncoder(w).Encode(ResponseStruct{Success: false, ErrorCode: 401, Title: "Permission Denied", Message: "An error occurred."})
