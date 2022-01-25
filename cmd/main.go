@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	log := utils.NewLogger()
 	// Initialize all loggers
+	log := utils.NewLogger()
 	middleware.InitLogger(log)
 	routes.InitLogger(log)
 	sessions.InitLogger(log)
