@@ -23,6 +23,7 @@ function createNewDocument() {
       Refresh: false,
       ReadOnly: false,
       Restricted: true,
+      Content: ""
     },
     true
   );

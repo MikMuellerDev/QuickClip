@@ -1,4 +1,4 @@
-function createInput(label, placeholder) {
+function createInput(label: string, placeholder: string) {
   const main = document.createElement("input");
   main.className = "text-input";
   main.type = "text";
@@ -7,7 +7,7 @@ function createInput(label, placeholder) {
   return main;
 }
 
-function createButton(label) {
+function createButton(label: string) {
   const button = document.createElement("button");
   const buttonText = document.createElement("a");
   buttonText.innerText = label;
@@ -16,25 +16,25 @@ function createButton(label) {
   return button;
 }
 
-function createSpan(label, className) {
+function createSpan(label: string, className: string) {
   const span = document.createElement("span");
   span.className = className;
   span.innerText = label;
   return span;
 }
 
-async function deleteHandler(id) {
+async function deleteHandler(id: string) {
   console.log(`DELETE: ${id}`);
   await deleteClip(id);
 }
 
-async function modifyHandler(obj) {
+async function modifyHandler(obj: Clip) {
   console.log(`MODIFY: ${obj.Name}`);
   await modifyClip(obj);
 }
 
-function newPopup(doc, create) {
-  let descriptionTextPrev;
+function newPopup(doc: Clip, create: boolean) {
+  let descriptionTextPrev: string;
 
   const main = document.createElement("div");
   main.className = "edit-overlay";
@@ -48,7 +48,7 @@ function newPopup(doc, create) {
   idTitle.innerText = `ID: ${doc.Id}`;
   idTitle.className = "popup-doc-id";
 
-  const description = createSpan("edit-overlay-description");
+  const description = createSpan("edit-overlay-description", "");
   description.innerText = doc.Description;
   description.className = "popup-doc-description";
 
@@ -68,7 +68,7 @@ function newPopup(doc, create) {
   buttonsDiv.className = "edit-overlay-buttons";
 
   const refreshIntervalInput = createInput(
-    doc.RefreshInterval,
+    `${doc.RefreshInterval}`,
     "Refresh Interval"
   );
 
@@ -79,7 +79,7 @@ function newPopup(doc, create) {
   const deleteButton = createButton("delete");
   deleteButton.style.backgroundColor = "var(--clr-error)";
 
-  let saveButton;
+  let saveButton: HTMLButtonElement;
 
   if (create) {
     saveButton = createButton("create");
@@ -138,6 +138,7 @@ function newPopup(doc, create) {
         Refresh: doc.Refresh,
         ReadOnly: doc.ReadOnly,
         Restricted: doc.Restricted,
+        Content: "",
       });
     } else {
       const tempDocs = await getDocuments();
@@ -160,6 +161,7 @@ function newPopup(doc, create) {
         Refresh: doc.Refresh,
         ReadOnly: doc.ReadOnly,
         Restricted: doc.Restricted,
+        Content: "",
       });
     }
 
@@ -201,10 +203,15 @@ function newPopup(doc, create) {
   mainDiv.appendChild(buttonsDiv);
   main.appendChild(mainDiv);
   main.appendChild(sliderDiv);
-  main.style.zIndex = -1000;
+  main.style.zIndex = "-1000";
   main.style.display = "none";
 
-  const docTraits = ["Restricted", "ReadOnly", "Refresh"];
+  // const docTraits = ["Restricted", "ReadOnly", "Refresh"];
+  const docTraits: ("Restricted" | "ReadOnly" | "Refresh")[] = [
+    "Restricted",
+    "ReadOnly",
+    "Refresh",
+  ];
   for (let trait of docTraits) {
     const traitSwitchArr = createSlider();
     const traitSwitch = traitSwitchArr[0];
@@ -233,22 +240,26 @@ function newPopup(doc, create) {
   return main;
 }
 
-function showPopup(id) {
-  const allDocuments = document.getElementById("doc-selector-div");
-  const main = document.getElementById(id);
+function showPopup(id: string) {
+  const allDocuments = document.getElementById(
+    "doc-selector-div"
+  ) as HTMLDivElement;
+  const main = document.getElementById(id) as HTMLElement;
   main.style.opacity = "0";
   main.style.display = "flex";
   setTimeout(() => {
     main.style.opacity = "100%";
     allDocuments.style.filter = "brightness(50%)";
-    main.style.zIndex = 1000;
+    main.style.zIndex = "1000";
   }, 100);
 }
 
-function hidePopup(id) {
-  const allDocuments = document.getElementById("doc-selector-div");
-  allDocuments.zIndex = -2000;
-  const main = document.getElementById(id);
+function hidePopup(id: string) {
+  const allDocuments = document.getElementById(
+    "doc-selector-div"
+  ) as HTMLDivElement;
+  allDocuments.style.zIndex = "-2000";
+  const main = document.getElementById(id) as HTMLElement;
 
   main.style.opacity = "0%";
   main.style.transform = "translate(-50%, -50rem)";
@@ -256,12 +267,12 @@ function hidePopup(id) {
   setTimeout(() => {
     main.style.display = "none";
     allDocuments.style.filter = "brightness(100%)";
-    main.style.zIndex = -1000;
-    allDocuments.zIndex = 0;
+    main.style.zIndex = "-1000";
+    allDocuments.style.zIndex = "0";
   }, 400);
 }
 
-function createSlider() {
+function createSlider(): [HTMLLabelElement, HTMLInputElement] {
   let switchL;
   let switchE;
 

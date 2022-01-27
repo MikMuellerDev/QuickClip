@@ -1,14 +1,1 @@
-{
-    "Clips": [
-        {
-            "Name": "Test Document",
-            "Id": "my-unique-id",
-            "Content": "",
-            "Description": "Test Document's description",
-            "Restricted": false,
-            "Refresh": false,
-            "RefreshInterval": 0,
-            "ReadOnly": false
-        }
-    ]
-}
+{"Clips":[{"Name":"Test Document","Id":"my-unique-id","Content":"zsdasdasd","Description":"Test Document's description","Restricted":false,"Refresh":true,"RefreshInterval":0,"ReadOnly":false}]}

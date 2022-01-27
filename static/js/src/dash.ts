@@ -3,6 +3,6 @@ window.onload = async function () {
   const documents = await getDocuments();
   const version = await getVersion();
   setButtonText(userStatus.LoggedIn);
-  addDocuments(documents);
+  addDocuments(documents, false);
   setVersion(version.Version, version.Production);
 };

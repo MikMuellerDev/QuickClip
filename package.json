@@ -1,0 +1,22 @@
+{
+  "name": "quickclip",
+  "version": "0.7.0",
+  "description": "A self-hosted alternative to PasteBin.",
+  "main": "nan",
+  "scripts": {
+    "test": "nan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MikMuellerDev/QuickClip.git"
+  },
+  "keywords": [
+    "clipboard"
+  ],
+  "author": "MikMuellerDev",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/MikMuellerDev/QuickClip/issues"
+  },
+  "homepage": "https://github.com/MikMuellerDev/QuickClip#readme"
+}

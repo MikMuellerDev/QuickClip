@@ -16,3 +16,7 @@ build
 *.log
 log/error.log
 RELEASENOTES.md
+
+node_modules
+./static/js/out
+.vscode

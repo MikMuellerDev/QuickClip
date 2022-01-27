@@ -1,12 +1,12 @@
 let spinnerLock = false;
 
-function setTitle(doc) {
-  const titleElement = document.getElementById("title");
+function setTitle(doc: Clip) {
+  const titleElement = document.getElementById("title") as HTMLHeadingElement ;
   titleElement.innerHTML = `Editing ${doc.Name}`;
 }
 
-function registerTypeEvents(doc) {
-  const textArea = document.getElementById("clip");
+function registerTypeEvents(doc: Clip) {
+  const textArea = document.getElementById("clip") as HTMLInputElement;
   textArea.oninput = async () => {
     setWordCount(textArea.value);
     if (!spinnerLock) {
@@ -23,23 +23,23 @@ function registerTypeEvents(doc) {
   };
 }
 
-function setText(doc) {
-  const textArea = document.getElementById("clip");
+function setText(doc: Clip) {
+  const textArea = document.getElementById("clip") as HTMLTextAreaElement;
   textArea.value = doc.Content;
 }
 
-function setWordCount(text) {
+function setWordCount(text: string) {
   const len = text.length;
   let words = text.split(" ").length;
   if (len == 0) {
     words = 0;
   }
 
-  document.getElementById("wordcount").innerText = `${words}`;
-  document.getElementById("charcount").innerText = `${len}`;
+  (document.getElementById("wordcount") as HTMLSpanElement).innerText = `${words}`;
+  (document.getElementById("charcount") as HTMLSpanElement).innerText = `${len}`;
 }
 
-async function refresh(id, timeout) {
+async function refresh(id: string, timeout: number) {
   const doc = await getDocumentById(id, true);
   setText(doc);
   setWordCount(doc.Content)
@@ -58,30 +58,30 @@ async function quitSave() {
 }
 
 function copyText() {
-  const textArea = document.getElementById("clip");
+  const textArea = document.getElementById("clip") as HTMLTextAreaElement ;
   textArea.select();
   textArea.setSelectionRange(0, 99999);
   document.execCommand("copy");
   textArea.blur();
 }
 
-async function setWriteMode(doc) {
+async function setWriteMode(doc: Clip) {
   if (doc.ReadOnly) {
     console.log("This document is read-only.");
     const success = await probeWriteAccess(doc.Id);
     if (success) {
       console.log("[PROBE] Write allowed.");
-      document.getElementById("readOnlyIndicator").innerText = "";
+      (document.getElementById("readOnlyIndicator") as HTMLSpanElement).innerText = "";
     } else {
       console.log("[PROBE] Write forbidden.");
-      const clip = document.getElementById("clip");
+      const clip = document.getElementById("clip") as HTMLTextAreaElement;
       clip.disabled = true;
-      document.getElementById("readOnlyIndicator").innerText = "read-only";
+      (document.getElementById("readOnlyIndicator") as HTMLSpanElement ).innerText = "read-only";
       if (doc.Refresh) {
-        document.getElementById("refreshIndicator").innerText = "(live)";
-        document.getElementById(
+        (document.getElementById("refreshIndicator") as HTMLSpanElement ).innerText = "(live)";
+        (document.getElementById(
           "refreshIndicator"
-        ).innerHTML = `<span>synchronized ${doc.RefreshInterval}ms  </span> <img id='syncSymbol' src='/static/media/sync.png'>`;
+        ) as HTMLSpanElement ).innerHTML = `<span>synchronized ${doc.RefreshInterval}ms  </span> <img id='syncSymbol' src='/static/media/sync.png'>`;
         console.log(
           `%cThis document supports live-editing @ ${
             doc.RefreshInterval / 1000
@@ -91,8 +91,8 @@ async function setWriteMode(doc) {
 
         refresh(doc.Id, doc.RefreshInterval).then();
       } else {
-        document.getElementById("refreshIndicator").innerText = "(static)";
-        document.getElementById("refreshIndicator").innerHTML =
+        (document.getElementById("refreshIndicator") as HTMLSpanElement).innerText = "(static)";
+        (document.getElementById("refreshIndicator") as HTMLSpanElement).innerHTML =
           "<span>not synchronized</span> <img id='syncSymbol' src='/static/media/syncoff.png'>";
         console.log(`%cThis document is static.`, "color:red");
       }
@@ -103,14 +103,14 @@ async function setWriteMode(doc) {
 }
 
 window.onload = async () => {
-  const textArea = document.getElementById("clip");
+  const textArea = document.getElementById("clip") as HTMLTextAreaElement;
   textArea.value = "Loading Clipboard...";
 
   try {
     const url = window.location.href.split("/");
     const id = url[url.length - 1];
 
-    const doc = await getDocumentById(id);
+    const doc = await getDocumentById(id, false);
     setText(doc);
 
     setWriteMode(doc);

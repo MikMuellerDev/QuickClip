@@ -1,6 +1,8 @@
-function addDocuments(documents, useAdmin) {
+function addDocuments(documents: Clip[], useAdmin: boolean) {
   for (let doc of documents) {
-    const parentDiv = document.getElementById("doc-selector-div");
+    const parentDiv = document.getElementById(
+      "doc-selector-div"
+    ) as HTMLDivElement;
 
     const nodeItem = document.createElement("div");
     nodeItem.className = "mode-item station threeDp";
@@ -43,7 +45,7 @@ function addDocuments(documents, useAdmin) {
       if (!useAdmin) {
         window.location.href = `/edit/${doc.Id}`;
       } else {
-        newPopup(doc);
+        newPopup(doc, false);
         showPopup(doc.Id);
       }
     });
@@ -52,7 +54,9 @@ function addDocuments(documents, useAdmin) {
 
 function removeDocuments() {
   for (let i = 0; i < 2; i++) {
-    const parentDiv = document.getElementById("doc-selector-div");
+    const parentDiv = document.getElementById(
+      "doc-selector-div"
+    ) as HTMLDivElement;
     const children = parentDiv.children;
     for (let child of children) {
       child.remove();

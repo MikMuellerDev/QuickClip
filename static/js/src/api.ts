@@ -1,21 +1,24 @@
-async function setCurrentMode(id) {
-  const res = await fetch(`/api/mode/${id}`, { method: "post" });
-  return await res.json();
+interface UserStatus {
+  User: string;
+  LoggedIn: boolean;
 }
 
-async function getDocuments() {
+async function getDocuments(): Promise<Clip[]> {
   const url = "/api/clips";
   const res = await fetch(url);
   return (await res.json())["Clips"];
 }
 
-async function probeWriteAccess(id) {
+async function probeWriteAccess(id: string): Promise<boolean> {
   const url = `/api/clip/probe/${id}`;
   const res = await fetch(url);
-  return (await res.json()) ["Success"];
+  return (await res.json())["Success"];
 }
 
-async function getDocumentById(id, useKeepalive) {
+async function getDocumentById(
+  id: string,
+  useKeepalive: boolean
+): Promise<Clip> {
   let url = `/api/clip/${id}`;
   if (useKeepalive) {
     url = `/api/clip/refresh/${id}`;
@@ -24,13 +27,13 @@ async function getDocumentById(id, useKeepalive) {
   return await res.json();
 }
 
-async function getUserStatus() {
+async function getUserStatus(): Promise<UserStatus> {
   let url = `/api/user`;
   const res = await fetch(url);
   return await res.json();
 }
 
-async function textInput(id, content) {
+async function textInput(id: string, content: string) {
   const url = `/api/clips/edit/${id}`;
   const cont = { Content: content };
   const res = await fetch(url, {
@@ -45,7 +48,7 @@ async function textInput(id, content) {
   console.log(`Write successful: ${data.Success}`);
 }
 
-async function modifyClip(obj) {
+async function modifyClip(obj: Clip) {
   const url = `/api/clips/update`;
 
   const res = await fetch(url, {
@@ -60,7 +63,7 @@ async function modifyClip(obj) {
   console.log(data);
 }
 
-async function createClip(obj) {
+async function createClip(obj: Clip) {
   const url = `/api/clips/add`;
 
   const res = await fetch(url, {
@@ -75,7 +78,7 @@ async function createClip(obj) {
   console.log(data);
 }
 
-async function deleteClip(id) {
+async function deleteClip(id: string) {
   const url = `/api/clips/update/${id}`;
   const res = await fetch(url, {
     method: "DELETE",

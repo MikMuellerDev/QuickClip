@@ -1,13 +1,13 @@
-function startSpinner(spinnerId) {
-    const spinner = document.getElementById(spinnerId)
+function startSpinner(spinnerId: string) {
+    const spinner = document.getElementById(spinnerId) as HTMLDivElement
     if (spinner.style.opacity !== '100%')
         if (spinner.style.animation !== 'spinnerAnimation 0.9s linear infinite')
             spinner.style.animation = 'spinnerAnimation 0.9s linear infinite'
     spinner.style.opacity = '100%'
 }
 
-function stopSpinner(spinnerId) {
-    const spinner = document.getElementById(spinnerId)
+function stopSpinner(spinnerId: string) {
+    const spinner = document.getElementById(spinnerId) as HTMLDivElement
     if (spinner.style.opacity === '1') {
         setTimeout(function () {
             spinner.style.opacity = '0'
