@@ -1,6 +1,6 @@
 {
     "port": 8081,
-    "production": false,
+    "production": true,
     "instanceName": "QuickClip",
     "users": [
         {

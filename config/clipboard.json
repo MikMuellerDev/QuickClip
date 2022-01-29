@@ -3,7 +3,7 @@
         {
             "Name": "Test Document",
             "Id": "my-unique-id",
-            "Content": "",
+            "Content": "Write something...",
             "Description": "Test Document's description",
             "Restricted": false,
             "Refresh": true,

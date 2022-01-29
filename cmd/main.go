@@ -22,7 +22,7 @@ func main() {
 	log.Debug("Logging initialized.")
 
 	config := utils.GetConfig()
-	config.Version = "0.7.0"
+	config.Version = "0.7.1"
 	r := routes.NewRouter()
 	utils.ReadClipFile()
 	utils.ReadConfigFile()

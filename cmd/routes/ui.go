@@ -90,3 +90,7 @@ func editGetHandler(w http.ResponseWriter, r *http.Request) {
 		templates.ExecuteTemplate(w, "404.html", http.StatusOK)
 	}
 }
+
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "404.html", http.StatusNotFound)
+}
