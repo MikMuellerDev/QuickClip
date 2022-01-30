@@ -63,6 +63,7 @@ func getClipById(w http.ResponseWriter, r *http.Request) {
 	if success {
 		json.NewEncoder(w).Encode(clip)
 	} else {
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
 		return
 	}
@@ -75,6 +76,7 @@ func modClip(w http.ResponseWriter, r *http.Request) {
 
 	requestError := decoder.Decode(&tempClip)
 	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		log.Error(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a clip"})
 		return
@@ -86,10 +88,12 @@ func modClip(w http.ResponseWriter, r *http.Request) {
 		if success {
 			json.NewEncoder(w).Encode(clip)
 		} else {
+			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", tempClip.Id)})
 		}
 	} else {
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Permission denied", "You mus be admin to edit clips."})
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Permission denied", "You mus be admin to edit clips."})
 		return
 	}
 }
@@ -101,6 +105,7 @@ func addClip(w http.ResponseWriter, r *http.Request) {
 	requestError := decoder.Decode(&clip)
 
 	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a clip"})
 		return
@@ -108,10 +113,12 @@ func addClip(w http.ResponseWriter, r *http.Request) {
 	_, user := getUser(r)
 
 	if user != "admin" {
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Permission denied", "You mus be admin to add clips."})
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Permission denied", "You mus be admin to add clips."})
 	}
 
 	if utils.DoesClipExist(clip.Id) {
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", fmt.Sprintf("The Id: %s is already matched to a board.", clip.Id)})
 		return
 	}
@@ -154,7 +161,7 @@ func probeWriteAccess(w http.ResponseWriter, r *http.Request) {
 	_, clip := utils.GetClipById(id, user)
 	if clip.ReadOnly {
 		if !utils.HasWritePermission(user, id) {
-			json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Read Only", fmt.Sprintf("[PROBE] The ID: %s is set to read-only.", id)})
+			json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Read Only", fmt.Sprintf("[PROBE] The ID: %s is set to read-only.", id)})
 			return
 		}
 	}
@@ -171,11 +178,13 @@ func editClip(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a TextInput"})
 		return
 	}
 	if !utils.DoesClipExist(id) {
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
 		return
 	}
@@ -185,7 +194,8 @@ func editClip(w http.ResponseWriter, r *http.Request) {
 
 	if clipFromId.ReadOnly {
 		if !utils.HasWritePermission(user, id) {
-			json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Read Only", fmt.Sprintf("The ID: %s is set to read-only.", id)})
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Read Only", fmt.Sprintf("The ID: %s is set to read-only.", id)})
 			return
 		}
 	}
@@ -193,9 +203,11 @@ func editClip(w http.ResponseWriter, r *http.Request) {
 	editSuccess := utils.EditClip(id, inputRequest.Content, user)
 
 	if editSuccess {
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "", Message: ""})
 	} else {
-		json.NewEncoder(w).Encode(ResponseStruct{Success: false, ErrorCode: 401, Title: "Permission Denied", Message: "An error occurred."})
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{Success: false, ErrorCode: 403, Title: "Permission Denied", Message: "An error occurred."})
 	}
 }
 
