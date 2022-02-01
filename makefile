@@ -1,9 +1,9 @@
-appname := QuickClip-0.7.3
+appname := QuickClip-0.7.4
 applicationDir := QuickClip
 
 sources := $(wildcard *.go)
 
-build =  cd ./cmd && GOOS=$(1) GOARCH=$(2) go build -o ../bin/$(appname)$(3)
+build =  cd ./cmd && GOOS=$(1) GOARCH=$(2) go build -o ../bin/$(appname)$(3) $(4)
 tar =  mkdir -p build && cd ../ && tar --exclude $(applicationDir)/static/js/src -cvzf ./$(appname)_$(1)_$(2).tar.gz $(applicationDir)/bin $(applicationDir)/config $(applicationDir)/static $(applicationDir)/templates && mv $(appname)_$(1)_$(2).tar.gz $(applicationDir)/build
 
 .PHONY: all linux
@@ -37,7 +37,7 @@ build/linux_386.tar.gz: $(sources)
 	$(call tar,linux,386)
 
 build/linux_amd64.tar.gz: $(sources)
-	$(call build,linux,amd64,)
+	$(call build,linux,amd64, -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osusergo netgo static_build')
 	$(call tar,linux,amd64)
 
 build/linux_arm.tar.gz: $(sources)
