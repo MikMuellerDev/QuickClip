@@ -20,9 +20,9 @@ require (
 )
 
 replace (
-	github.com/MikMuellerDev/QuickClip/middleware => ./cmd/middleware
-	github.com/MikMuellerDev/QuickClip/routes => ./cmd/routes
-	github.com/MikMuellerDev/QuickClip/sessions => ./cmd/sessions
-	github.com/MikMuellerDev/QuickClip/templates => ./cmd/templates
-	github.com/MikMuellerDev/QuickClip/utils => ./cmd/utils
+	github.com/MikMuellerDev/QuickClip/middleware => ./middleware
+	github.com/MikMuellerDev/QuickClip/routes => ./routes
+	github.com/MikMuellerDev/QuickClip/sessions => ./sessions
+	github.com/MikMuellerDev/QuickClip/templates => ./templates
+	github.com/MikMuellerDev/QuickClip/utils => ./utils
 )
