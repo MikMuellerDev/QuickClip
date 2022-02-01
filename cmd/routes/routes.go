@@ -41,6 +41,9 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/login", middleware.LogRequest(loginGetHandler)).Methods("GET")
 	r.HandleFunc("/login", middleware.LogRequest(loginPostHandler)).Methods("POST")
 	r.HandleFunc("/logout", middleware.LogRequest(logoutGetHandler)).Methods("GET")
+
+	r.HandleFunc("/robots.txt", middleware.LogRequest(robotsTxtHandler)).Methods("GET")
+	r.HandleFunc("/health", healthHandler).Methods("GET")
 	r.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	filepath := "../static"

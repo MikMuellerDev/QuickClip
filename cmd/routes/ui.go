@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/MikMuellerDev/QuickClip/middleware"
@@ -93,4 +94,13 @@ func editGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "404.html", http.StatusNotFound)
+}
+
+func robotsTxtHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "User-agent: * Disallow:\n")
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Status: Ok")
 }

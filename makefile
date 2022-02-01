@@ -1,4 +1,4 @@
-appname := QuickClip-0.7.2
+appname := QuickClip-0.7.3
 applicationDir := QuickClip
 
 sources := $(wildcard *.go)
