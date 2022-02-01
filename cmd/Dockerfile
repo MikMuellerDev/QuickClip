@@ -51,7 +51,7 @@ COPY --from=builder /app /app
 EXPOSE 8080
 
 # Perform any further action as an unprivileged user.
-USER nobody:nobody
+USER quickclipuser:quickclipuser
 
 # Run the compiled binary.
 ENTRYPOINT ["/app"]
