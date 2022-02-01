@@ -21,11 +21,13 @@ func main() {
 	utils.InitLogger(log)
 	log.Debug("Logging initialized.")
 
-	config := utils.GetConfig()
-	config.Version = "0.7.4"
-	r := routes.NewRouter()
 	utils.ReadClipFile()
+	utils.RequestSave()
 	utils.ReadConfigFile()
+
+	config := utils.GetConfig()
+	config.Version = "0.8.0"
+	r := routes.NewRouter()
 	middleware.InitializeLogin(config)
 
 	sessions.Init(config.Production)

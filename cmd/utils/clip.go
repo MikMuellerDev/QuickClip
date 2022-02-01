@@ -135,7 +135,7 @@ func writeClips(clips Clips) {
 		log.Fatal("Error during unmarshal", err.Error())
 	}
 
-	clipJson, _ := json.Marshal(clips)
+	clipJson, _ := json.MarshalIndent(clips, "", "    ")
 	prevSave = clipJson
 	err = ioutil.WriteFile("../config/clipboard.json", clipJson, 0644)
 	if err != nil {

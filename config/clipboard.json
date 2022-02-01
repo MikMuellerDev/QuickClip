@@ -1,12 +1,12 @@
 {
     "Clips": [
         {
-            "Name": "Test Document",
-            "Id": "my-unique-id",
-            "Content": "Write something...",
-            "Description": "Test Document's description",
+            "Name": "Default Document",
+            "Id": "default",
+            "Content": "Write something.",
+            "Description": "This Document's description",
             "Restricted": false,
-            "Refresh": true,
+            "Refresh": false,
             "RefreshInterval": 0,
             "ReadOnly": false
         }

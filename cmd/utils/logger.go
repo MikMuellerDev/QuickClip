@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 )
@@ -14,6 +17,19 @@ func InitLogger(logger *logrus.Logger) {
 }
 
 func NewLogger() *logrus.Logger {
+	applicationLog, err := os.Create("../log/application.log")
+	if err != nil {
+		fmt.Println(err)
+	}
+	applicationLog.Close()
+
+	errorLog, err := os.Create("../log/error.log")
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	errorLog.Close()
+
 	if Log != nil {
 		return Log
 	}
