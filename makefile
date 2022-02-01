@@ -37,7 +37,8 @@ build/linux_386.tar.gz: $(sources)
 	$(call tar,linux,386)
 
 build/linux_amd64.tar.gz: $(sources)
-	$(call build,linux,amd64, -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osusergo netgo static_build')
+	$(call build,linux,amd64, WORKDIR /src
+)
 	$(call tar,linux,amd64)
 
 build/linux_arm.tar.gz: $(sources)

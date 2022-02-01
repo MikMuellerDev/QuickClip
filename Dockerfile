@@ -14,7 +14,10 @@ RUN mkdir /user && \
 # Install the Certificate-Authority certificates for the app to be able to make
 # calls to HTTPS endpoints.
 # Git is required for fetching the dependencies.
-RUN apk add --no-cache ca-certificates git
+
+
+# RUN apk add --no-cache git
+RUN apk add ca-certificates git
 
 # Set the working directory outside $GOPATH to enable the support for modules.
 WORKDIR /src
@@ -22,11 +25,11 @@ WORKDIR /src
 # Fetch dependencies first; they are less susceptible to change on every build
 # and will therefore be cached for speeding up the next build
 # COPY ./go.mod ./go.sum ./
-COPY ./**/go.mod ./**/go.sum ./
+COPY ./cmd/**/go.mod ./cmd/**/go.sum ./
 RUN go mod download
 
 # Import the code from the context.
-COPY ./ ./
+COPY ./cmd ./
 
 # Build the executable to `/app`. Mark the build as statically linked.
 RUN CGO_ENABLED=0 go build \
@@ -43,15 +46,24 @@ COPY --from=builder /user/group /user/passwd /etc/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Import the compiled executable from the first stage.
-COPY --from=builder /app /app
+COPY --from=builder /app /main
+
+# RUN mkdir /main/log
+# RUN touch /main/log/application.log
+# RUN touch /main/log/error.log
+
+COPY ./config /config
+COPY ./templates /templates
+COPY ./static /static
+COPY ./log /log
 
 # Declare the port on which the webserver will be exposed.
 # As we're going to run the executable as an unprivileged user, we can't bind
 # to ports below 1024.
-EXPOSE 8080
+EXPOSE 8081
 
 # Perform any further action as an unprivileged user.
 USER quickclipuser:quickclipuser
 
 # Run the compiled binary.
-ENTRYPOINT ["/app"]
+ENTRYPOINT ["/main"]
