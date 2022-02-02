@@ -63,6 +63,7 @@ func ApiAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		} else if TestCredentials(username, password, false) {
 
+			// UNCOMMENT IF SAVING SESSION WHEN USING API IS WANTED
 			// session, _ := sessions.Store.Get(r, "session")
 			// session.Values["valid"] = true
 			// session.Values["username"] = username
@@ -80,7 +81,8 @@ func ApiAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 
 func LogRequest(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Trace(fmt.Sprintf("[\x1b[32m%s\x1b[0m] FROM: (\x1b[34m%s\x1b[0m) [%s] Serving path:\x1b[35m%s\x1b[0m, user agent:%s", r.Method, r.RemoteAddr, r.Proto, r.URL.Path, r.UserAgent()))
+		// UA stands for user-agent
+		log.Trace(fmt.Sprintf("[\x1b[32m%s\x1b[0m] FROM: (\x1b[34m%s\x1b[0m) [%s] Serving path:\x1b[35m%s\x1b[0m, UA:%s", r.Method, r.RemoteAddr, r.Proto, r.URL.Path, r.UserAgent()))
 		handler.ServeHTTP(w, r)
 	}
 }

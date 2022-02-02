@@ -60,17 +60,17 @@ func writeEmergencyConfigFile() {
 			WriteAllowed: make([]string, 1),
 		})
 
-	config = Config{Production: false, Port: 80, Users: users, InstanceName: "QuickClip"}
+	config = Config{Production: true, Port: 80, Users: users, InstanceName: "QuickClip"}
 	var jsonBlob = []byte(`{}`)
 	err := json.Unmarshal(jsonBlob, &config)
 	if err != nil {
-		log.Fatal("Error during unmarshal", err.Error())
+		log.Fatal("[Write] Error during unmarshal", err.Error())
 	}
 
 	configJson, _ := json.MarshalIndent(config, "", "    ")
 	err = ioutil.WriteFile("../config/config.json", configJson, 0644)
 	if err != nil {
-		log.Fatal("Error writing config: %s", err.Error())
+		log.Fatal("[Write] Error writing config: %s", err.Error())
 	}
 	log.Debug("Written emergency config contents to config.json.")
 }

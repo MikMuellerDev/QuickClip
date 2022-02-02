@@ -4,6 +4,6 @@ services:
     image: mikmuellerdev/quickclip
     container_name: quickclip
     ports:
-      - 8081:8081
+      - 8081:80
     volumes:
-      - /tmp/quickclip-config:/app/QuickClip/config
+      - /tmp/quickclipconfig:/app/quickclip/config

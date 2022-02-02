@@ -1,9 +1,9 @@
 FROM amd64/debian:stable-slim
 
-ADD ./QuickClip /app/QuickClip
-ADD ./run.sh /app/QuickClip/bin/run.sh
+ADD ./QuickClip /app/quickclip
+ADD ./run.sh /app/quickclip/bin/run.sh
 
-WORKDIR /app/QuickClip/
+WORKDIR /app/quickclip/
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -yq \
   tzdata \
@@ -13,4 +13,4 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -yq \
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s CMD curl --fail http://localhost:80/health || exit 1
 EXPOSE 80
-ENTRYPOINT ["/app/QuickClip/bin/run.sh"]
+ENTRYPOINT ["/app/quickclip/bin/run.sh"]
