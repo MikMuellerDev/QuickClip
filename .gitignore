@@ -14,7 +14,6 @@ build
 log/error.log
 RELEASENOTES.md
 /static/js/out
-/static/css/out
 /docker/QuickClip
 /docker/app.tar.gz
 node_modules
