@@ -54,7 +54,7 @@ func writeEmergencyConfigFile() {
 
 	users = append(users,
 		User{
-			Name:         "admin",
+			Name:         "default",
 			Password:     "password",
 			Permissions:  make([]string, 1),
 			WriteAllowed: make([]string, 1),
