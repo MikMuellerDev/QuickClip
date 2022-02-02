@@ -25,6 +25,7 @@ docker: cleanall web
 	cd ./cmd && GOOS=linux GOARCH=amd64 go build -o ../bin/QuickClip -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osusergo netgo static_build' 
 	cd ../ && tar --exclude QuickClip/static/js/src -cvzf ./app.tar.gz QuickClip/bin QuickClip/config QuickClip/static QuickClip/templates && mv app.tar.gz QuickClip/docker/
 	rm -rf bin
+	sudo systemctl start docker
 	cd docker && bash build.sh 
 	rm -rf docker/QuickClip 
 	rm -rf docker/app.tar.gz

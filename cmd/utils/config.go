@@ -60,7 +60,7 @@ func writeEmergencyConfigFile() {
 			WriteAllowed: make([]string, 1),
 		})
 
-	config = Config{Production: false, Port: 8081, Users: users, InstanceName: "QuickClip"}
+	config = Config{Production: false, Port: 80, Users: users, InstanceName: "QuickClip"}
 	var jsonBlob = []byte(`{}`)
 	err := json.Unmarshal(jsonBlob, &config)
 	if err != nil {
