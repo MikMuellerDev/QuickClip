@@ -75,6 +75,24 @@ func writeEmergencyConfigFile() {
 	log.Debug("Written emergency config contents to config.json.")
 }
 
+func WriteConfigFile() bool {
+	var jsonBlob = []byte(`{}`)
+	err := json.Unmarshal(jsonBlob, &config)
+	if err != nil {
+		log.Fatal("Error during unmarshal", err.Error())
+		return false
+	}
+
+	configJson, _ := json.MarshalIndent(config, "", "    ")
+	err = ioutil.WriteFile("../config/config2.json", configJson, 0644)
+	if err != nil {
+		log.Fatal("Error writing configuration file: %s", err.Error())
+		return false
+	}
+	log.Debug("Written configuration file to config.json")
+	return true
+}
+
 func GetConfig() *Config {
 	return &config
 }

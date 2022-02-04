@@ -91,7 +91,7 @@ func ModClipInList(clip Clip) {
 	var clipsCpy []Clip
 	for _, v := range clips.Clips {
 		if v.Id == clip.Id {
-			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: clip.Id, Content: clip.Content, Description: clip.Description, Restricted: clip.Restricted, Refresh: clip.Refresh, RefreshInterval: clip.RefreshInterval, ReadOnly: clip.ReadOnly})
+			clipsCpy = append(clipsCpy, Clip{Name: clip.Name, Id: v.Id, Content: v.Content, Description: clip.Description, Restricted: clip.Restricted, Refresh: clip.Refresh, RefreshInterval: clip.RefreshInterval, ReadOnly: clip.ReadOnly})
 		} else {
 			clipsCpy = append(clipsCpy, v)
 		}

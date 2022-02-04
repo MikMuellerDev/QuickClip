@@ -3,11 +3,11 @@
         {
             "Name": "Default Document",
             "Id": "default",
-            "Content": "Write something.",
+            "Content": "hallo",
             "Description": "This Document's description",
             "Restricted": false,
             "Refresh": false,
-            "RefreshInterval": 0,
+            "RefreshInterval": 1,
             "ReadOnly": false
         }
     ]

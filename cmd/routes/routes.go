@@ -25,13 +25,19 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/dash", middleware.LogRequest(dashGetHandler)).Methods("GET")
 	r.HandleFunc("/edit/{id}", middleware.LogRequest(editGetHandler)).Methods("GET")
 
-	r.HandleFunc("/api/user", middleware.LogRequest(getApiUser)).Methods("GET")
 	r.HandleFunc("/api/save", middleware.LogRequest(saveToFile)).Methods("PUT")
 	r.HandleFunc("/api/version", middleware.LogRequest(getVersion)).Methods("GET")
 	r.HandleFunc("/api/clips", middleware.LogRequest(getClips)).Methods("GET")
 	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(getClipById)).Methods("GET")
 	r.HandleFunc("/api/clip/probe/{id}", middleware.LogRequest(probeWriteAccess)).Methods("GET")
 	r.HandleFunc("/api/clip/refresh/{id}", getClipById).Methods("GET")
+
+	r.HandleFunc("/api/user", middleware.LogRequest(getApiUser)).Methods("GET")
+	r.HandleFunc("/api/users", middleware.AdminAuthRequired(middleware.LogRequest(getUserList))).Methods("GET")
+	r.HandleFunc("/api/user", middleware.AdminAuthRequired(middleware.LogRequest(createUser))).Methods("POST")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest())).Methods("PUT")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(getApiUser))).Methods("DELETE")
+	r.HandleFunc("/api/password", middleware.ApiAuthRequired(middleware.LogRequest(getApiUser))).Methods("PUT")
 
 	r.HandleFunc("/api/clips/update/{id}", middleware.ApiAuthRequired(middleware.LogRequest(removeClip))).Methods("DELETE")
 	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(editClip)).Methods("PUT")

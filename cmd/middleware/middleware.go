@@ -79,6 +79,43 @@ func ApiAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func AdminAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, _ := sessions.Store.Get(r, "session")
+		value, ok := session.Values["valid"]
+		sessionUserTemp := session.Values["username"]
+		sessionUser, _ := sessionUserTemp.(string)
+		valid, okParse := value.(bool)
+
+		query := r.URL.Query()
+		username := query.Get("username")
+		password := query.Get("password")
+
+		if ok && okParse && valid {
+			if sessionUser != "admin" {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must authenticate as a admin user."})
+				return
+			}
+			log.Trace(fmt.Sprintf("Valid Session, serving %s", r.URL.Path))
+			handler.ServeHTTP(w, r)
+			return
+		} else if TestCredentials(username, password, false) {
+			if username != "admin" {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must authenticate as a admin user."})
+				return
+			}
+			log.Trace(fmt.Sprintf("Invalid Session, but authenticated with query: Session Saved. Serving %s", r.URL.Path))
+			handler.ServeHTTP(w, r)
+			return
+		}
+		log.Trace(fmt.Sprintf("Invalid Session, redirecting %s to /login", r.URL.Path))
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must be authenticated as a admin user."})
+	}
+}
+
 func LogRequest(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// UA stands for user-agent

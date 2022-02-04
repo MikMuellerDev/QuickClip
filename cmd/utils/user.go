@@ -49,3 +49,63 @@ func DoesUserExist(username string) bool {
 	}
 	return false
 }
+
+// Returns a boolean for indicating the success
+func AddUser(user User) bool {
+	if DoesUserExist(user.Name) {
+		return false
+	}
+	config.Users = append(config.Users, user)
+	return WriteConfigFile()
+}
+
+func RemoveUser(username string) bool {
+	if !DoesUserExist(username) {
+		return false
+	}
+	var newUsers []User
+	for _, v := range config.Users {
+		if v.Name != username {
+			newUsers = append(newUsers, v)
+		}
+	}
+	config.Users = newUsers
+	return WriteConfigFile()
+}
+
+func AlterUser(username string, newUser User) bool {
+	if !DoesUserExist(username) {
+		return false
+	}
+	var newUsers []User
+	for _, v := range config.Users {
+		if v.Name != username {
+			newUsers = append(newUsers, v)
+		} else {
+			newUsers = append(newUsers, newUser)
+		}
+	}
+	config.Users = newUsers
+	return WriteConfigFile()
+}
+
+func AlterPassword(username string, newPassword string) bool {
+	if !DoesUserExist(username) {
+		return false
+	}
+	var newUsers []User
+	for _, user := range config.Users {
+		if user.Name != username {
+			newUsers = append(newUsers, user)
+		} else {
+			user.Password = newPassword
+			newUsers = append(newUsers, user)
+		}
+	}
+	config.Users = newUsers
+	return WriteConfigFile()
+}
+
+func GetUsers() []User {
+	return config.Users
+}

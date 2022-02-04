@@ -1,0 +1,35 @@
+{
+    "Version": "0.8.1",
+    "Production": true,
+    "Port": 8081,
+    "Users": [
+        {
+            "Name": "admin",
+            "Password": "password",
+            "Permissions": null,
+            "WriteAllowed": null
+        },
+        {
+            "Name": "testuser",
+            "Password": "password",
+            "Permissions": [
+                "*"
+            ],
+            "WriteAllowed": [
+                "demo",
+                "cli"
+            ]
+        },
+        {
+            "Name": "create",
+            "Password": "a",
+            "Permissions": [
+                ""
+            ],
+            "WriteAllowed": [
+                ""
+            ]
+        }
+    ],
+    "InstanceName": "QuickClip"
+}

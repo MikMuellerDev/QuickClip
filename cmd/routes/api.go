@@ -127,10 +127,66 @@ func addClip(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: "Clip was added."})
 }
 
+// USERS
+func getUserList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(utils.GetUsers())
+}
+
 func getApiUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	loggedIn, user := getUser(r)
 	json.NewEncoder(w).Encode(UserResponse{User: user, LoggedIn: loggedIn})
+}
+
+func createUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	var user utils.User
+	requestError := decoder.Decode(&user)
+
+	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a User"})
+		return
+	}
+
+	success := utils.AddUser(user)
+	if success {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was added.", user.Name)})
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "This user already exists."})
+	}
+}
+
+func modifyUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["username"]
+
+	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	var newUser utils.User
+	requestError := decoder.Decode(&newUser)
+
+	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a User"})
+		return
+	}
+
+	success := utils.AlterUser(id, newUser)
+
+	if success {
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was altered.", newUser.Name)})
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
+		return
+	}
 }
 
 func removeClip(w http.ResponseWriter, r *http.Request) {
