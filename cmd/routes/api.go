@@ -221,6 +221,9 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["username"]
 	w.Header().Set("Content-Type", "application/json")
+	if id == "admin" {
+		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Denied", "Cannot delete admin user."})
+	}
 	success := utils.DeleteUser(id)
 	middleware.InitializeLogin(utils.GetConfig())
 	if success {
