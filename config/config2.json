@@ -5,9 +5,14 @@
     "Users": [
         {
             "Name": "admin",
-            "Password": "password",
-            "Permissions": null,
-            "WriteAllowed": null
+            "Password": "pw2",
+            "Permissions": [
+                "",
+                ""
+            ],
+            "WriteAllowed": [
+                ""
+            ]
         },
         {
             "Name": "testuser",
@@ -18,16 +23,6 @@
             "WriteAllowed": [
                 "demo",
                 "cli"
-            ]
-        },
-        {
-            "Name": "create",
-            "Password": "a",
-            "Permissions": [
-                ""
-            ],
-            "WriteAllowed": [
-                ""
             ]
         }
     ],

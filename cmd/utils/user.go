@@ -7,6 +7,10 @@ type User struct {
 	WriteAllowed []string
 }
 
+type Password struct {
+	Password string
+}
+
 func HasPermission(username string, permissionToCheck string) bool {
 	if username == "admin" {
 		return true
@@ -59,7 +63,7 @@ func AddUser(user User) bool {
 	return WriteConfigFile()
 }
 
-func RemoveUser(username string) bool {
+func DeleteUser(username string) bool {
 	if !DoesUserExist(username) {
 		return false
 	}

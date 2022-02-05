@@ -19,7 +19,7 @@ func getUser(r *http.Request) (bool, string) {
 
 	query := r.URL.Query()
 	queryUser := query.Get("username")
-	queryPassword := query.Get("password")
+	queryPassword := query.Get("passwdeleteUserord")
 
 	if okSessionUser && utils.DoesUserExist(sessionUser) {
 		return true, sessionUser
@@ -153,6 +153,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	success := utils.AddUser(user)
+	middleware.InitializeLogin(utils.GetConfig())
 	if success {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was added.", user.Name)})
@@ -179,12 +180,54 @@ func modifyUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	success := utils.AlterUser(id, newUser)
-
+	middleware.InitializeLogin(utils.GetConfig())
 	if success {
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was altered.", newUser.Name)})
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", id)})
+		return
+	}
+}
+
+func alterPassword(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["username"]
+
+	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	var newPassword utils.Password
+	requestError := decoder.Decode(&newPassword)
+
+	if requestError != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Warn(fmt.Sprintf("Invalid Request: %s", requestError.Error()))
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a Password struct"})
+		return
+	}
+
+	success := utils.AlterPassword(id, newPassword.Password)
+	middleware.InitializeLogin(utils.GetConfig())
+	if success {
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Password of User: %s was altered.", id)})
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", id)})
+		return
+	}
+}
+
+func deleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["username"]
+	w.Header().Set("Content-Type", "application/json")
+	success := utils.DeleteUser(id)
+	middleware.InitializeLogin(utils.GetConfig())
+	if success {
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was deleted.", id)})
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", id)})
 		return
 	}
 }

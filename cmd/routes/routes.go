@@ -35,9 +35,9 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/api/user", middleware.LogRequest(getApiUser)).Methods("GET")
 	r.HandleFunc("/api/users", middleware.AdminAuthRequired(middleware.LogRequest(getUserList))).Methods("GET")
 	r.HandleFunc("/api/user", middleware.AdminAuthRequired(middleware.LogRequest(createUser))).Methods("POST")
-	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest())).Methods("PUT")
-	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(getApiUser))).Methods("DELETE")
-	r.HandleFunc("/api/password", middleware.ApiAuthRequired(middleware.LogRequest(getApiUser))).Methods("PUT")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(modifyUser))).Methods("PUT")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(deleteUser))).Methods("DELETE")
+	r.HandleFunc("/api/password", middleware.ApiAuthRequired(middleware.LogRequest(alterPassword))).Methods("PUT")
 
 	r.HandleFunc("/api/clips/update/{id}", middleware.ApiAuthRequired(middleware.LogRequest(removeClip))).Methods("DELETE")
 	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(editClip)).Methods("PUT")
