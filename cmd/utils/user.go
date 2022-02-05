@@ -77,6 +77,7 @@ func DeleteUser(username string) bool {
 	return WriteConfigFile()
 }
 
+// If the new User's password is "?", don't change it.
 func AlterUser(username string, newUser User) bool {
 	if !DoesUserExist(username) {
 		return false
@@ -86,6 +87,9 @@ func AlterUser(username string, newUser User) bool {
 		if v.Name != username {
 			newUsers = append(newUsers, v)
 		} else {
+			if newUser.Password == "?" {
+				newUser.Password = v.Password
+			}
 			newUsers = append(newUsers, newUser)
 		}
 	}
