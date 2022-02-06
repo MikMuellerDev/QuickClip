@@ -1,6 +1,6 @@
 {
-    "Version": "0.8.1",
-    "Production": false,
+    "InstanceName": "QuickClip",
+    "Production": true,
     "Port": 8081,
     "Users": [
         {
@@ -16,10 +16,8 @@
                 "*"
             ],
             "WriteAllowed": [
-                "demo",
-                "cli"
+                "demo"
             ]
         }
-    ],
-    "InstanceName": "QuickClip"
+    ]
 }

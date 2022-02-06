@@ -124,6 +124,11 @@ function removeUsers() {
 }
 
 window.onload = async () => {
+  const userStatus = await getUserStatus();
+  const version = await getVersion();
+  setVersion(version.Version, version.Production);
+  setButtonText(userStatus.LoggedIn);
+
   const users = await getUsers();
   console.log(users);
   addUsers(users);
