@@ -60,7 +60,7 @@ async function modifyClip(obj: Clip) {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }
 
 async function createClip(obj: Clip) {
@@ -75,7 +75,7 @@ async function createClip(obj: Clip) {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }
 
 async function deleteClip(id: string) {
@@ -88,7 +88,7 @@ async function deleteClip(id: string) {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }
 
 async function requestSave() {
@@ -101,5 +101,5 @@ async function requestSave() {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }

@@ -1,24 +1,25 @@
 {
-    "port": 8081,
-    "production": false,
-    "instanceName": "QuickClip",
-    "users": [
+    "Version": "0.8.1",
+    "Production": false,
+    "Port": 8081,
+    "Users": [
         {
-            "name": "admin",
-            "password": "password",
-            "writeAllowed": [],
-            "permissions": []
+            "Name": "admin",
+            "Password": "password",
+            "Permissions": [],
+            "WriteAllowed": []
         },
         {
-            "name": "testuser",
-            "password": "password",
-            "writeAllowed": [
+            "Name": "testuser",
+            "Password": "password",
+            "Permissions": [
+                "*"
+            ],
+            "WriteAllowed": [
                 "demo",
                 "cli"
-            ],
-            "permissions": [
-                "*"
             ]
         }
-    ]
+    ],
+    "InstanceName": "QuickClip"
 }

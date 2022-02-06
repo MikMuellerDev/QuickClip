@@ -1,10 +1,8 @@
 async function deleteHandler(id: string) {
-  console.log(`DELETE: ${id}`);
   await deleteClip(id);
 }
 
 async function modifyHandler(obj: Clip) {
-  console.log(`MODIFY: ${obj.Name}`);
   await modifyClip(obj);
 }
 
@@ -78,7 +76,6 @@ function newPopup(doc: Clip, create: boolean) {
   };
 
   descriptionInput.oninput = () => {
-    console.log(descriptionInput.value.length);
     if (descriptionInput.value.length === 0) {
       description.innerText = doc.Name;
     } else if (descriptionInput.value.length < 34) {
@@ -196,7 +193,7 @@ function newPopup(doc: Clip, create: boolean) {
 
     traitSwitchListener.onchange = () => {
       doc[trait] = traitSwitchListener.checked;
-      console.log(`Trait ${trait} changed to ${doc[trait]}`);
+      // console.log(`Trait ${trait} changed to ${doc[trait]}`);
     };
 
     const switchContainer = document.createElement("div");

@@ -9,7 +9,7 @@ async function getUsers(): Promise<User[]> {
   const url = "/api/users";
   const res = await fetch(url);
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 
   return data;
 }
@@ -26,7 +26,7 @@ async function createUser(obj: User) {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }
 
 async function modifyUser(username: string, obj: User) {
@@ -41,8 +41,23 @@ async function modifyUser(username: string, obj: User) {
   });
 
   const data = await res.json();
-  console.log(data);
+  //console.log(data);
 }
+
+async function deleteUser(username: string) {
+  const url = `/api/user/${username}`;
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await res.json();
+  //console.log(data);
+}
+
 
 async function createNewUser() {
   await newUserPopup(
@@ -65,14 +80,13 @@ function addUsers(users: User[]) {
 
     const nodeItem = document.createElement("div");
     nodeItem.className = "mode-item station threeDp";
-    // nodeItem.id = doc.Id;
 
     const nodeItemLeft = document.createElement("div");
     nodeItemLeft.className = "node-item-left";
 
     const nodeItemLeftPicture = document.createElement("div");
     nodeItemLeftPicture.className = "node-item-picture";
-    nodeItemLeftPicture.style.backgroundImage = `url(/static/media/pen.png)`;
+    nodeItemLeftPicture.style.backgroundImage = `url(/static/media/user.png)`;
 
     const nodeItemLabels = document.createElement("div");
     nodeItemLabels.className = "node-item-labels";
@@ -89,6 +103,11 @@ function addUsers(users: User[]) {
     setTimeout(function () {
       nodeItem.style.opacity = "1";
     }, 50);
+
+    nodeItem.onclick = async () => {
+      await newUserPopup(user, false)
+      showPopup(user.Name)
+    }
   }
 }
 
@@ -108,8 +127,4 @@ window.onload = async () => {
   const users = await getUsers();
   console.log(users);
   addUsers(users);
-  const derUser = users[0];
-  console.log(derUser);
-  await newUserPopup(derUser, false);
-  showPopup("admin");
 };

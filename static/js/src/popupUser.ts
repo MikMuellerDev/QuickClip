@@ -2,8 +2,6 @@ async function newUserPopup(user: User, create: boolean) {
   const main = document.createElement("div");
   let passwordShown = false;
   main.className = "edit-overlay";
-  console.log(user.Name);
-
   main.id = user.Name;
 
   const name = document.createElement("h2");
@@ -15,6 +13,28 @@ async function newUserPopup(user: User, create: boolean) {
 
   const sliderDiv = document.createElement("div");
   sliderDiv.className = "edit-overlay-slider-div";
+
+  // Permissions Div
+  const permissionsSliderDiv = document.createElement("div");
+  permissionsSliderDiv.className = "permissions-slider-div";
+  const permissionsSliderDivHeading = document.createElement("h4");
+  permissionsSliderDivHeading.innerText = "Access Allowed";
+  permissionsSliderDivHeading.className = "slider-heading";
+  sliderDiv.appendChild(permissionsSliderDivHeading);
+  sliderDiv.appendChild(permissionsSliderDiv);
+
+  const spacer = document.createElement("div");
+  spacer.className = "spacer";
+  sliderDiv.appendChild(spacer);
+
+  // Write allowed Div
+  const writeAllowedSliderDiv = document.createElement("div");
+  writeAllowedSliderDiv.className = "write-allowed-slider-div";
+  const writeAllowedSliderDivHeading = document.createElement("h4");
+  writeAllowedSliderDivHeading.innerText = "Write Allowed";
+  writeAllowedSliderDivHeading.className = "slider-heading";
+  sliderDiv.appendChild(writeAllowedSliderDivHeading);
+  sliderDiv.appendChild(writeAllowedSliderDiv);
 
   const inputDiv = document.createElement("div");
   inputDiv.className = "edit-overlay-inputs";
@@ -67,7 +87,7 @@ async function newUserPopup(user: User, create: boolean) {
   deleteButton.onclick = async () => {
     const confirm = prompt("Enter `yes` to confirm deletion", "");
     if (confirm == "yes") {
-      await deleteHandler(user.Name);
+      await deleteUser(user.Name);
       removeUsers();
       const users = await getUsers();
       if (users !== null) addUsers(users);
@@ -139,33 +159,46 @@ async function newUserPopup(user: User, create: boolean) {
   mainDiv.appendChild(inputDiv);
   mainDiv.appendChild(buttonsDiv);
   main.appendChild(mainDiv);
-  main.appendChild(sliderDiv);
+  if (user.Name !== "admin") main.appendChild(sliderDiv);
   main.style.zIndex = "-1000";
   main.style.display = "none";
 
   const clipboards = await getDocuments();
+  // Modify cached clipboards, so they include the virtual "*"" id
+  clipboards.push({
+    Content: "",
+    Description: "",
+    Id: "*",
+    Name: "ALL (wildcard)",
+    ReadOnly: false,
+    Refresh: false,
+    RefreshInterval: 0,
+    Restricted: false,
+  });
   for (let clip of clipboards) {
     const traitSwitchArr = createSlider();
     const traitSwitch = traitSwitchArr[0];
     const traitSwitchListener = traitSwitchArr[1];
 
-    traitSwitchListener.checked = user.Permissions.includes(clip.Name);
+    traitSwitchListener.checked = user.Permissions.includes(clip.Id);
 
     traitSwitchListener.onchange = () => {
+      if (clip.Id == "*" && traitSwitchListener.checked) {
+        alert("You are about to activate a wildcard permission.")
+      }
       if (traitSwitchListener.checked) {
-        if (!user.Permissions.includes(clip.Name)) {
-          user.Permissions.push(clip.Name);
+        if (!user.Permissions.includes(clip.Id)) {
+          user.Permissions.push(clip.Id);
         }
       } else {
         let permissionsTemp: string[] = [];
         for (let item of user.Permissions) {
-          if (item !== clip.Name) {
-            permissionsTemp.push(clip.Name);
+          if (item !== clip.Id) {
+            permissionsTemp.push(clip.Id);
           }
         }
         user.Permissions = permissionsTemp;
       }
-      console.log(user.Permissions);
     };
 
     const switchContainer = document.createElement("div");
@@ -176,7 +209,7 @@ async function newUserPopup(user: User, create: boolean) {
 
     switchContainer.appendChild(traitSwitch);
     switchContainer.appendChild(switchContainerSpan);
-    sliderDiv.appendChild(switchContainer);
+    permissionsSliderDiv.appendChild(switchContainer);
   }
 
   for (let clip of clipboards) {
@@ -184,23 +217,26 @@ async function newUserPopup(user: User, create: boolean) {
     const traitSwitch = traitSwitchArr[0];
     const traitSwitchListener = traitSwitchArr[1];
 
-    traitSwitchListener.checked = user.WriteAllowed.includes(clip.Name);
+    traitSwitchListener.checked = user.WriteAllowed.includes(clip.Id);
 
     traitSwitchListener.onchange = () => {
+      if (clip.Id == "*" && traitSwitchListener.checked) {
+        alert("You are about to activate a wildcard permission.")
+      }
+
       if (traitSwitchListener.checked) {
-        if (!user.WriteAllowed.includes(clip.Name)) {
-          user.WriteAllowed.push(clip.Name);
+        if (!user.WriteAllowed.includes(clip.Id)) {
+          user.WriteAllowed.push(clip.Id);
         }
       } else {
         let permissionsTemp: string[] = [];
         for (let item of user.WriteAllowed) {
-          if (item !== clip.Name) {
-            permissionsTemp.push(clip.Name);
+          if (item !== clip.Id) {
+            permissionsTemp.push(clip.Id);
           }
         }
         user.WriteAllowed = permissionsTemp;
       }
-      console.log(user.WriteAllowed);
     };
 
     const switchContainer = document.createElement("div");
@@ -211,7 +247,7 @@ async function newUserPopup(user: User, create: boolean) {
 
     switchContainer.appendChild(traitSwitch);
     switchContainer.appendChild(switchContainerSpan);
-    sliderDiv.appendChild(switchContainer);
+    writeAllowedSliderDiv.appendChild(switchContainer);
   }
 
   document.getElementsByTagName("body")[0].appendChild(main);

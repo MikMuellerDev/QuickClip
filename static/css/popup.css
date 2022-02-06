@@ -1,8 +1,8 @@
 .edit-overlay {
   position: absolute;
   background-color: #404040;
-  height: 22rem;
-  width: 43rem;
+  min-height: 22rem;
+  min-width: 43rem;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -77,8 +77,9 @@
 
 @media (max-width: 47.5rem) {
   .edit-overlay {
+    min-width: 0;
     width: 80%;
-    height: 80%;
+    min-height: 80%;
   }
 
   .edit-overlay-slider-div {
@@ -125,5 +126,9 @@
     background-color: #303030;
     border-radius: 0.3rem;
     word-wrap: break-word;
+  }
+
+  .edit-overlay-slider-div {
+    width: 80%;
   }
 }

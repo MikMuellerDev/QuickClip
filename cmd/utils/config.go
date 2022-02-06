@@ -84,7 +84,7 @@ func WriteConfigFile() bool {
 	}
 
 	configJson, _ := json.MarshalIndent(config, "", "    ")
-	err = ioutil.WriteFile("../config/config2.json", configJson, 0644)
+	err = ioutil.WriteFile("../config/config.json", configJson, 0644)
 	if err != nil {
 		log.Fatal("Error writing configuration file: %s", err.Error())
 		return false
