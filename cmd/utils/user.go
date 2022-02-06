@@ -88,6 +88,7 @@ func AlterUser(username string, newUser User) bool {
 			newUsers = append(newUsers, v)
 		} else {
 			if newUser.Password == "?" {
+				newUser.Name = username
 				newUser.Password = v.Password
 			}
 			newUsers = append(newUsers, newUser)

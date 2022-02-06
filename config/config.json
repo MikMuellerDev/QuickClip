@@ -1,11 +1,13 @@
 {
     "port": 8081,
-    "production": true,
+    "production": false,
     "instanceName": "QuickClip",
     "users": [
         {
             "name": "admin",
-            "password": "password"
+            "password": "password",
+            "writeAllowed": [],
+            "permissions": []
         },
         {
             "name": "testuser",

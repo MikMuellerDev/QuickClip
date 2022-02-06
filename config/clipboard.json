@@ -1,13 +1,13 @@
 {
     "Clips": [
         {
-            "Name": "Default Document",
+            "Name": "Default Clipboard",
             "Id": "default",
             "Content": "hallo",
-            "Description": "This Document's description",
+            "Description": "Document's description",
             "Restricted": false,
             "Refresh": false,
-            "RefreshInterval": 1,
+            "RefreshInterval": -1,
             "ReadOnly": false
         }
     ]

@@ -70,6 +70,16 @@ func adminGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func adminUserSettingsGetHandler(w http.ResponseWriter, r *http.Request) {
+	_, user := getUser(r)
+	if user == "admin" {
+		templates.ExecuteTemplate(w, "user.html", http.StatusOK)
+	} else {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+}
+
 func editGetHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	requestedId := vars["id"]

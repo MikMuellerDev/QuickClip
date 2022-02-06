@@ -1,18 +1,13 @@
 {
     "Version": "0.8.1",
-    "Production": true,
+    "Production": false,
     "Port": 8081,
     "Users": [
         {
             "Name": "admin",
-            "Password": "pw2",
-            "Permissions": [
-                "",
-                ""
-            ],
-            "WriteAllowed": [
-                ""
-            ]
+            "Password": "password",
+            "Permissions": [],
+            "WriteAllowed": []
         },
         {
             "Name": "testuser",

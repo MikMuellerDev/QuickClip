@@ -22,6 +22,7 @@ func NewRouter() *mux.Router {
 
 	r.HandleFunc("/", middleware.LogRequest(indexGetHandler)).Methods("GET")
 	r.HandleFunc("/admin", middleware.AuthRequired(middleware.LogRequest(adminGetHandler))).Methods("GET")
+	r.HandleFunc("/admin/users", middleware.AuthRequired(middleware.LogRequest(adminUserSettingsGetHandler))).Methods("GET")
 	r.HandleFunc("/dash", middleware.LogRequest(dashGetHandler)).Methods("GET")
 	r.HandleFunc("/edit/{id}", middleware.LogRequest(editGetHandler)).Methods("GET")
 
