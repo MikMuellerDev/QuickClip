@@ -163,91 +163,93 @@ async function newUserPopup(user: User, create: boolean) {
   main.style.zIndex = "-1000";
   main.style.display = "none";
 
-  const clipboards = await getDocuments();
-  // Modify cached clipboards, so they include the virtual "*"" id
-  clipboards.push({
-    Content: "",
-    Description: "",
-    Id: "*",
-    Name: "ALL (wildcard)",
-    ReadOnly: false,
-    Refresh: false,
-    RefreshInterval: 0,
-    Restricted: false,
-  });
-  for (let clip of clipboards) {
-    const traitSwitchArr = createSlider();
-    const traitSwitch = traitSwitchArr[0];
-    const traitSwitchListener = traitSwitchArr[1];
+  if (user.Name !== "admin") {
+    const clipboards = await getDocuments();
+    // Modify cached clipboards, so they include the virtual "*"" id
+    clipboards.push({
+      Content: "",
+      Description: "",
+      Id: "*",
+      Name: "ALL (wildcard)",
+      ReadOnly: false,
+      Refresh: false,
+      RefreshInterval: 0,
+      Restricted: false,
+    });
+    for (let clip of clipboards) {
+      const traitSwitchArr = createSlider();
+      const traitSwitch = traitSwitchArr[0];
+      const traitSwitchListener = traitSwitchArr[1];
 
-    traitSwitchListener.checked = user.Permissions.includes(clip.Id);
+      traitSwitchListener.checked = user.Permissions.includes(clip.Id);
 
-    traitSwitchListener.onchange = () => {
-      if (clip.Id == "*" && traitSwitchListener.checked) {
-        alert("You are about to activate a wildcard permission.")
-      }
-      if (traitSwitchListener.checked) {
-        if (!user.Permissions.includes(clip.Id)) {
-          user.Permissions.push(clip.Id);
+      traitSwitchListener.onchange = () => {
+        if (clip.Id == "*" && traitSwitchListener.checked) {
+          alert("You are about to activate a wildcard permission.");
         }
-      } else {
-        let permissionsTemp: string[] = [];
-        for (let item of user.Permissions) {
-          if (item !== clip.Id) {
-            permissionsTemp.push(clip.Id);
+        if (traitSwitchListener.checked) {
+          if (!user.Permissions.includes(clip.Id)) {
+            user.Permissions.push(clip.Id);
           }
-        }
-        user.Permissions = permissionsTemp;
-      }
-    };
-
-    const switchContainer = document.createElement("div");
-    switchContainer.className = "inner-slider-div";
-
-    const switchContainerSpan = document.createElement("span");
-    switchContainerSpan.innerText = clip.Name;
-
-    switchContainer.appendChild(traitSwitch);
-    switchContainer.appendChild(switchContainerSpan);
-    permissionsSliderDiv.appendChild(switchContainer);
-  }
-
-  for (let clip of clipboards) {
-    const traitSwitchArr = createSlider();
-    const traitSwitch = traitSwitchArr[0];
-    const traitSwitchListener = traitSwitchArr[1];
-
-    traitSwitchListener.checked = user.WriteAllowed.includes(clip.Id);
-
-    traitSwitchListener.onchange = () => {
-      if (clip.Id == "*" && traitSwitchListener.checked) {
-        alert("You are about to activate a wildcard permission.")
-      }
-
-      if (traitSwitchListener.checked) {
-        if (!user.WriteAllowed.includes(clip.Id)) {
-          user.WriteAllowed.push(clip.Id);
-        }
-      } else {
-        let permissionsTemp: string[] = [];
-        for (let item of user.WriteAllowed) {
-          if (item !== clip.Id) {
-            permissionsTemp.push(clip.Id);
+        } else {
+          let permissionsTemp: string[] = [];
+          for (let item of user.Permissions) {
+            if (item !== clip.Id) {
+              permissionsTemp.push(clip.Id);
+            }
           }
+          user.Permissions = permissionsTemp;
         }
-        user.WriteAllowed = permissionsTemp;
-      }
-    };
+      };
 
-    const switchContainer = document.createElement("div");
-    switchContainer.className = "inner-slider-div";
+      const switchContainer = document.createElement("div");
+      switchContainer.className = "inner-slider-div";
 
-    const switchContainerSpan = document.createElement("span");
-    switchContainerSpan.innerText = clip.Name;
+      const switchContainerSpan = document.createElement("span");
+      switchContainerSpan.innerText = clip.Name;
 
-    switchContainer.appendChild(traitSwitch);
-    switchContainer.appendChild(switchContainerSpan);
-    writeAllowedSliderDiv.appendChild(switchContainer);
+      switchContainer.appendChild(traitSwitch);
+      switchContainer.appendChild(switchContainerSpan);
+      permissionsSliderDiv.appendChild(switchContainer);
+    }
+
+    for (let clip of clipboards) {
+      const traitSwitchArr = createSlider();
+      const traitSwitch = traitSwitchArr[0];
+      const traitSwitchListener = traitSwitchArr[1];
+
+      traitSwitchListener.checked = user.WriteAllowed.includes(clip.Id);
+
+      traitSwitchListener.onchange = () => {
+        if (clip.Id == "*" && traitSwitchListener.checked) {
+          alert("You are about to activate a wildcard permission.");
+        }
+
+        if (traitSwitchListener.checked) {
+          if (!user.WriteAllowed.includes(clip.Id)) {
+            user.WriteAllowed.push(clip.Id);
+          }
+        } else {
+          let permissionsTemp: string[] = [];
+          for (let item of user.WriteAllowed) {
+            if (item !== clip.Id) {
+              permissionsTemp.push(clip.Id);
+            }
+          }
+          user.WriteAllowed = permissionsTemp;
+        }
+      };
+
+      const switchContainer = document.createElement("div");
+      switchContainer.className = "inner-slider-div";
+
+      const switchContainerSpan = document.createElement("span");
+      switchContainerSpan.innerText = clip.Name;
+
+      switchContainer.appendChild(traitSwitch);
+      switchContainer.appendChild(switchContainerSpan);
+      writeAllowedSliderDiv.appendChild(switchContainer);
+    }
   }
 
   document.getElementsByTagName("body")[0].appendChild(main);
