@@ -26,7 +26,7 @@ func main() {
 	utils.ReadConfigFile()
 
 	config := utils.GetConfig()
-	config.Version = "0.9.0"
+	config.Version = "0.1.0"
 	r := routes.NewRouter()
 	middleware.InitializeLogin(config)
 

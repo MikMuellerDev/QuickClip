@@ -1,6 +1,6 @@
 {
   "name": "quickclip",
-  "version": "0.9.0",
+  "version": "0.1.0",
   "description": "A self-hosted alternative to PasteBin.",
   "main": "nan",
   "scripts": {
