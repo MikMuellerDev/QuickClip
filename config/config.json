@@ -6,8 +6,8 @@
         {
             "Name": "admin",
             "Password": "password",
-            "Permissions": [],
-            "WriteAllowed": []
+            "Permissions": ["*"],
+            "WriteAllowed": ["*"]
         },
         {
             "Name": "testuser",
@@ -16,7 +16,7 @@
                 "*"
             ],
             "WriteAllowed": [
-                "demo"
+                "*"
             ]
         }
     ]

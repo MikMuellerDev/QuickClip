@@ -3,7 +3,7 @@
         {
             "Name": "Default Clipboard",
             "Id": "default",
-            "Content": "hallo",
+            "Content": "Write something..",
             "Description": "Document's description",
             "Restricted": false,
             "Refresh": false,
