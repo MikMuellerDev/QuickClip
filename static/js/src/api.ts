@@ -63,6 +63,20 @@ async function modifyClip(obj: Clip) {
   //console.log(data);
 }
 
+async function changePassword(password: string) {
+  const url = `/api/password`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ Password: password }),
+  });
+
+  const data = await res.json();
+  console.log(data);
+}
+
 async function createClip(obj: Clip) {
   const url = `/api/clips/add`;
 

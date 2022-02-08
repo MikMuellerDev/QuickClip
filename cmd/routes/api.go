@@ -191,9 +191,6 @@ func modifyUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func alterPassword(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["username"]
-
 	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 	var newPassword utils.Password
@@ -205,14 +202,14 @@ func alterPassword(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a Password struct"})
 		return
 	}
-
-	success := utils.AlterPassword(id, newPassword.Password)
+	_, user := getUser(r)
+	success := utils.AlterPassword(user, newPassword.Password)
 	middleware.InitializeLogin(utils.GetConfig())
 	if success {
-		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Password of User: %s was altered.", id)})
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Password of User: %s was altered.", user)})
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", id)})
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", user)})
 		return
 	}
 }

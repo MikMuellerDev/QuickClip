@@ -5,4 +5,7 @@ window.onload = async function () {
   setButtonText(userStatus.LoggedIn);
   addDocuments(documents, false);
   setVersion(version.Version, version.Production);
+  if (userStatus.LoggedIn) {
+    addPasswordChangeButton();
+  }
 };

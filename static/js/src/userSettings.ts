@@ -58,7 +58,6 @@ async function deleteUser(username: string) {
   //console.log(data);
 }
 
-
 async function createNewUser() {
   await newUserPopup(
     {
@@ -79,7 +78,7 @@ function addUsers(users: User[]) {
     ) as HTMLDivElement;
 
     const nodeItem = document.createElement("div");
-    nodeItem.className = "mode-item station threeDp";
+    nodeItem.className = "mode-item threeDp";
 
     const nodeItemLeft = document.createElement("div");
     nodeItemLeft.className = "node-item-left";
@@ -105,9 +104,9 @@ function addUsers(users: User[]) {
     }, 50);
 
     nodeItem.onclick = async () => {
-      await newUserPopup(user, false)
-      showPopup(user.Name)
-    }
+      await newUserPopup(user, false);
+      showPopup(user.Name);
+    };
   }
 }
 

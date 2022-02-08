@@ -4,6 +4,9 @@ nav {
   box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
     0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 1rem;
 }
 
 #navbar-left {
@@ -27,6 +30,6 @@ nav {
   }
 
   #navbar-application-version {
-    font-size: .5rem;
+    font-size: 0.5rem;
   }
 }

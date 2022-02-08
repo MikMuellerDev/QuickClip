@@ -66,12 +66,16 @@
   justify-content: space-evenly;
 }
 
+.edit-overlay-labels-alt {
+  margin: 0;
+}
+
 .popup-doc-id {
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   font-family: monospace;
   background-color: #303030;
-  border-radius: .4rem;
-  padding: .1rem;
+  border-radius: 0.4rem;
+  padding: 0.1rem;
   width: fit-content;
 }
 
@@ -116,13 +120,13 @@
   }
 
   .popup-doc-title {
-    padding: .1rem;
+    padding: 0.1rem;
     font-size: 1.4rem;
     margin-bottom: 1rem;
   }
 
   .popup-doc-description {
-    padding: .4rem;
+    padding: 0.4rem;
     background-color: #303030;
     border-radius: 0.3rem;
     word-wrap: break-word;

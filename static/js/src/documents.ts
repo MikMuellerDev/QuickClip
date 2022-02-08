@@ -5,7 +5,7 @@ function addDocuments(documents: Clip[], useAdmin: boolean) {
     ) as HTMLDivElement;
 
     const nodeItem = document.createElement("div");
-    nodeItem.className = "mode-item station threeDp";
+    nodeItem.className = "mode-item threeDp";
     // nodeItem.id = doc.Id;
 
     const nodeItemLeft = document.createElement("div");
