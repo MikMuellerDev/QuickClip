@@ -29,7 +29,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/api/save", middleware.LogRequest(saveToFile)).Methods("PUT")
 	r.HandleFunc("/api/version", middleware.LogRequest(getVersion)).Methods("GET")
 	r.HandleFunc("/api/clips", middleware.LogRequest(getClips)).Methods("GET")
-	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(getClipById)).Methods("GET")
+	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(middleware.ProvideAuth(getClipById))).Methods("GET")
 	r.HandleFunc("/api/clip/probe/{id}", middleware.LogRequest(probeWriteAccess)).Methods("GET")
 	r.HandleFunc("/api/clip/refresh/{id}", getClipById).Methods("GET")
 
