@@ -106,6 +106,19 @@ window.onload = async () => {
   const textArea = document.getElementById("clip") as HTMLTextAreaElement;
   textArea.value = "Loading Clipboard...";
 
+  document.onkeydown = async (e) => {
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      if (!spinnerLock) {
+        spinnerLock = true;
+        startSpinner("edit-spinner");
+      }
+      await requestSave();
+      stopSpinner("edit-spinner");
+      spinnerLock = false;
+    }
+  }
+
   try {
     const url = window.location.href.split("/");
     const id = url[url.length - 1];
