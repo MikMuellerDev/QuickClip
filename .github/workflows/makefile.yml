@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
           
     - name: Build for all architectures
-      run: sudo apt install nodejs && npm i -D minify-all-js && make build
+      run: sudo apt install nodejs && sudo npm i -g minify-all-js && make build
 
     - name: Create docker image
       run: make docker
