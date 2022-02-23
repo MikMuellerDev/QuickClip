@@ -19,7 +19,7 @@ func getUser(r *http.Request) (bool, string) {
 
 	query := r.URL.Query()
 	queryUser := query.Get("username")
-	queryPassword := query.Get("passwdeleteUserord")
+	queryPassword := query.Get("password")
 
 	if okSessionUser && utils.DoesUserExist(sessionUser) {
 		return true, sessionUser
