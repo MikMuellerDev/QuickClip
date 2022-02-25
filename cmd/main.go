@@ -29,7 +29,6 @@ func main() {
 	config.Version = "1.1.2"
 	r := routes.NewRouter()
 	middleware.InitializeLogin(config)
-
 	sessions.Init(config.Production)
 	templates.LoadTemplates("../templates/*.html")
 	http.Handle("/", r)
