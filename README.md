@@ -37,7 +37,7 @@ tar -xvf Quickclip-0.0.0.tar.gz
 Then navigate in the newly unpacked `QuickClip` directory and it's subfolder `bin`. Here you can just run the executable.
 
 ## Issues
-On Debian `./QuickClip-0.4.0-Beta: /lib/x86_64-linux-gnu/libc.so.6: version GLIBC_2.32' not found (required by ./QuickClip-0.4.0-Beta)` can happen when running the executable on an old syste,.
+On Debian `./QuickClip-0.4.0-Beta: /lib/x86_64-linux-gnu/libc.so.6: version GLIBC_2.32' not found (required by ./QuickClip-0.4.0-Beta)` can happen when running the executable on an old system.
 ## Fix
 It is likely that this has already been fixed, if not you know what do to.
 ```
