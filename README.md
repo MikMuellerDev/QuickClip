@@ -1,5 +1,5 @@
 # QuickClip
- A self hosted, simple alternative to PasteBin.
+ A self-hosted, simple alternative to PasteBin.
 
 ## Install
 ### Docker 🐋
