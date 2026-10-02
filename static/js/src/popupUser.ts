@@ -49,7 +49,8 @@ async function newUserPopup(user: User, create: boolean) {
   if (!create) {
     nameInput.disabled = true;
   }
-  const passwordInput = createInput(user.Password, "Password");
+  // The server never sends passwords, leaving the field empty keeps the current one
+  const passwordInput = createInput("", create ? "Password" : "Unchanged");
   passwordInput.type = "password";
 
   passwordInput.onclick = () => {

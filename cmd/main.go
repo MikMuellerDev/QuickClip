@@ -24,12 +24,12 @@ func main() {
 	utils.ReadClipFile()
 	utils.RequestSave()
 	utils.ReadConfigFile()
+	utils.EnsureAdminUser()
 
 	config := utils.GetConfig()
 	config.Version = "1.1.2"
 	r := routes.NewRouter()
-	middleware.InitializeLogin(config)
-	sessions.Init(config.Production)
+	sessions.Init()
 	templates.LoadTemplates("../templates/*.html")
 	http.Handle("/", r)
 	log.Info(fmt.Sprintf("\x1b[34mQuickClip [Version %s] [%s] is running on http://localhost:%d", config.Version, config.InstanceName, config.Port))

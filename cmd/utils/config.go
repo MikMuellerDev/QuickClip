@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"sync"
 )
 
 type Config struct {
@@ -15,6 +16,7 @@ type Config struct {
 }
 
 var config Config
+var configMutex sync.RWMutex
 
 func ReadConfigFile() {
 	path := "../config/config.json"
@@ -36,61 +38,35 @@ func ReadConfigFile() {
 	log.Debug(fmt.Sprintf("Loaded QuickClip config File from %s", path))
 }
 
+// The admin user (with a random password) is created afterwards by EnsureAdminUser()
 func writeEmergencyConfigFile() {
-	var users []User
-	var permissionsAdmin []string
-	var writePermissionsAdmin []string
-
-	permissionsAdmin = append(permissionsAdmin, "*")
-	writePermissionsAdmin = append(writePermissionsAdmin, "*")
-
-	users = append(users,
-		User{
-			Name:         "admin",
-			Password:     "password",
-			Permissions:  permissionsAdmin,
-			WriteAllowed: writePermissionsAdmin,
-		})
-
-	users = append(users,
-		User{
-			Name:         "default",
-			Password:     "password",
-			Permissions:  make([]string, 1),
-			WriteAllowed: make([]string, 1),
-		})
-
-	config = Config{Production: true, Port: 80, Users: users, InstanceName: "QuickClip"}
-	var jsonBlob = []byte(`{}`)
-	err := json.Unmarshal(jsonBlob, &config)
-	if err != nil {
-		log.Fatal("[Write] Error during unmarshal", err.Error())
-	}
-
-	configJson, _ := json.MarshalIndent(config, "", "    ")
-	err = ioutil.WriteFile("../config/config.json", configJson, 0644)
-	if err != nil {
-		log.Fatal("[Write] Error writing config: %s", err.Error())
+	config = Config{Production: true, Port: 80, Users: []User{}, InstanceName: "QuickClip"}
+	if !writeConfig() {
+		log.Fatal("[Write] Error writing emergency config.")
 	}
 	log.Debug("Written emergency config contents to config.json.")
 }
 
-func WriteConfigFile() bool {
-	var jsonBlob = []byte(`{}`)
-	err := json.Unmarshal(jsonBlob, &config)
+// Caller must hold configMutex
+func writeConfig() bool {
+	configJson, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
-		log.Fatal("Error during unmarshal", err.Error())
+		log.Error("Error during marshal: ", err.Error())
 		return false
 	}
-
-	configJson, _ := json.MarshalIndent(config, "", "    ")
-	err = ioutil.WriteFile("../config/config.json", configJson, 0644)
+	err = ioutil.WriteFile("../config/config.json", configJson, 0600)
 	if err != nil {
-		log.Fatal("Error writing configuration file: %s", err.Error())
+		log.Error(fmt.Sprintf("Error writing configuration file: %s", err.Error()))
 		return false
 	}
 	log.Debug("Written configuration file to config.json")
 	return true
+}
+
+func WriteConfigFile() bool {
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	return writeConfig()
 }
 
 func GetConfig() *Config {

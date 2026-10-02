@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"github.com/MikMuellerDev/QuickClip/middleware"
 	"github.com/MikMuellerDev/QuickClip/sessions"
@@ -12,22 +14,21 @@ import (
 )
 
 func getUser(r *http.Request) (bool, string) {
-	// Session doesn't require a password (ZKP)
-	session, _ := sessions.Store.Get(r, "session")
-	sessionUserTemp, _ := session.Values["username"]
-	sessionUser, okSessionUser := sessionUserTemp.(string)
+	user, ok := middleware.CurrentUser(r)
+	return ok, user
+}
 
-	query := r.URL.Query()
-	queryUser := query.Get("username")
-	queryPassword := query.Get("password")
+var clipIdPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,64}$`)
 
-	if okSessionUser && utils.DoesUserExist(sessionUser) {
-		return true, sessionUser
-	} else if middleware.TestCredentials(queryUser, queryPassword, true) {
-		return true, queryUser
-	} else {
-		return false, ""
+// Returns an error message if the username or password is not acceptable
+func validateCredentials(username string, password string, checkPassword bool) string {
+	if username == "" || len(username) > 64 || strings.ContainsAny(username, ":/") || strings.TrimSpace(username) != username {
+		return "The username must be 1-64 characters long, without leading or trailing spaces, ':' or '/'."
 	}
+	if checkPassword && (len(password) < 8 || len(password) > 128) {
+		return "The password must be 8-128 characters long."
+	}
+	return ""
 }
 
 func getVersion(w http.ResponseWriter, r *http.Request) {
@@ -115,15 +116,20 @@ func addClip(w http.ResponseWriter, r *http.Request) {
 	if user != "admin" {
 		w.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Permission denied", "You mus be admin to add clips."})
-	}
-
-	if utils.DoesClipExist(clip.Id) {
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", fmt.Sprintf("The Id: %s is already matched to a board.", clip.Id)})
 		return
 	}
 
-	utils.AddClip(clip)
+	if !clipIdPattern.MatchString(clip.Id) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "The Id must be 1-64 characters long and may only contain letters, digits, '.', '_' and '-'."})
+		return
+	}
+
+	if !utils.AddClip(clip) {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", fmt.Sprintf("The Id: %s is already matched to a board.", clip.Id)})
+		return
+	}
 	json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: "Clip was added."})
 }
 
@@ -152,13 +158,18 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if message := validateCredentials(user.Name, user.Password, true); message != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", message})
+		return
+	}
+
 	success := utils.AddUser(user)
-	middleware.InitializeLogin(utils.GetConfig())
 	if success {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was added.", user.Name)})
 	} else {
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "This user already exists."})
 	}
 }
@@ -179,10 +190,21 @@ func modifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	changePassword := newUser.Password != "" && newUser.Password != "?"
+	if changePassword {
+		if message := validateCredentials(id, newUser.Password, true); message != "" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", message})
+			return
+		}
+	}
+
 	success := utils.AlterUser(id, newUser)
-	middleware.InitializeLogin(utils.GetConfig())
 	if success {
-		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was altered.", newUser.Name)})
+		if changePassword {
+			sessions.RevokeUser(id)
+		}
+		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was altered.", id)})
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown User", fmt.Sprintf("The Username: %s does not exist.", id)})
@@ -203,9 +225,19 @@ func alterPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, user := getUser(r)
+	if message := validateCredentials(user, newPassword.Password, true); message != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", message})
+		return
+	}
 	success := utils.AlterPassword(user, newPassword.Password)
-	middleware.InitializeLogin(utils.GetConfig())
 	if success {
+		// Log out every other session, keep the current one logged in
+		_, hadSession := sessions.User(r)
+		sessions.RevokeUser(user)
+		if hadSession {
+			sessions.Login(w, r, user)
+		}
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("Password of User: %s was altered.", user)})
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -219,11 +251,13 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	id := vars["username"]
 	w.Header().Set("Content-Type", "application/json")
 	if id == "admin" {
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Denied", "Cannot delete admin user."})
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Denied", "Cannot delete admin user."})
+		return
 	}
 	success := utils.DeleteUser(id)
-	middleware.InitializeLogin(utils.GetConfig())
 	if success {
+		sessions.RevokeUser(id)
 		json.NewEncoder(w).Encode(ResponseStruct{Success: true, ErrorCode: 0, Title: "Success", Message: fmt.Sprintf("User: %s was deleted.", id)})
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -238,10 +272,13 @@ func removeClip(w http.ResponseWriter, r *http.Request) {
 	requestedId := vars["id"]
 	_, user := getUser(r)
 	if user != "admin" {
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Permission denied", "You mus be admin to add clips."})
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Permission denied", "You mus be admin to remove clips."})
+		return
 	}
 
 	if !utils.DoesClipExist(requestedId) {
+		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", requestedId)})
 		return
 
@@ -257,7 +294,12 @@ func probeWriteAccess(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	_, user := getUser(r)
 
-	_, clip := utils.GetClipById(id, user)
+	found, clip := utils.GetClipById(id, user)
+	if !found {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("[PROBE] The ID: %s is not associated with any Object.", id)})
+		return
+	}
 	if clip.ReadOnly {
 		if !utils.HasWritePermission(user, id) {
 			json.NewEncoder(w).Encode(ResponseStruct{false, 403, "Read Only", fmt.Sprintf("[PROBE] The ID: %s is set to read-only.", id)})
@@ -282,14 +324,13 @@ func editClip(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(ResponseStruct{false, 400, "Invalid Request", "Your request could not be parsed to a TextInput"})
 		return
 	}
-	if !utils.DoesClipExist(id) {
+	_, user := getUser(r)
+	found, clipFromId := utils.GetClipById(id, user)
+	if !found {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(ResponseStruct{false, 404, "Unknown clip", fmt.Sprintf("The ID: %s is not associated with any Object.", id)})
 		return
 	}
-
-	_, user := getUser(r)
-	_, clipFromId := utils.GetClipById(id, user)
 
 	if clipFromId.ReadOnly {
 		if !utils.HasWritePermission(user, id) {

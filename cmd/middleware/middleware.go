@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	sessions "github.com/MikMuellerDev/QuickClip/sessions"
+	"github.com/MikMuellerDev/QuickClip/utils"
 	"github.com/sirupsen/logrus"
 )
 
 var log *logrus.Logger
+
+// Maximum size of a request body, larger requests are rejected
+const MaxBodyBytes = 2 << 20
 
 func InitLogger(logger *logrus.Logger) {
 	log = logger
@@ -22,131 +27,98 @@ type ResponseStruct struct {
 	Message   string
 }
 
+func writeJsonError(w http.ResponseWriter, status int, title string, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(ResponseStruct{false, status, title, message})
+}
+
+// Returns the authenticated user of the request.
+// Browsers authenticate using the session cookie, API clients can use HTTP Basic Auth.
+func CurrentUser(r *http.Request) (string, bool) {
+	if username, ok := sessions.User(r); ok && utils.DoesUserExist(username) {
+		return username, true
+	}
+	if username, password, ok := r.BasicAuth(); ok {
+		if success, _ := TestCredentials(r, username, password); success {
+			return username, true
+		}
+	}
+	return "", false
+}
+
 func AuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := sessions.Store.Get(r, "session")
-		value, ok := session.Values["valid"]
-		valid, okParse := value.(bool)
-
-		query := r.URL.Query()
-		username := query.Get("username")
-		password := query.Get("password")
-
-		// TODO impl checker for api requests that use url params auth instead of session
-		if ok && okParse && valid {
-			log.Trace(fmt.Sprintf("Valid Session, serving %s", r.URL.Path))
-			handler.ServeHTTP(w, r)
-			return
-		} else if TestCredentials(username, password, false) {
-			log.Trace(fmt.Sprintf("Invalid Session, but authenticated with query. serving %s", r.URL.Path))
+		if _, ok := CurrentUser(r); ok {
+			log.Trace(fmt.Sprintf("Authenticated, serving %s", r.URL.Path))
 			handler.ServeHTTP(w, r)
 			return
 		}
-		log.Trace(fmt.Sprintf("Invalid Session, redirecting %s to /login", r.URL.Path))
+		log.Trace(fmt.Sprintf("Not authenticated, redirecting %s to /login", r.URL.Path))
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }
 
 func ApiAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := sessions.Store.Get(r, "session")
-		value, ok := session.Values["valid"]
-		valid, okParse := value.(bool)
-
-		query := r.URL.Query()
-		username := query.Get("username")
-		password := query.Get("password")
-
-		if ok && okParse && valid {
-			log.Trace(fmt.Sprintf("Valid Session, serving %s", r.URL.Path))
-			handler.ServeHTTP(w, r)
-			return
-		} else if TestCredentials(username, password, false) {
-
-			// UNCOMMENT IF SAVING SESSION WHEN USING API IS WANTED
-			// session, _ := sessions.Store.Get(r, "session")
-			// session.Values["valid"] = true
-			// session.Values["username"] = username
-			// session.Save(r, w)
-
-			log.Trace(fmt.Sprintf("Invalid Session, but authenticated with query: Session Saved. Serving %s", r.URL.Path))
+		if _, ok := CurrentUser(r); ok {
+			log.Trace(fmt.Sprintf("Authenticated, serving %s", r.URL.Path))
 			handler.ServeHTTP(w, r)
 			return
 		}
-		log.Trace(fmt.Sprintf("Invalid Session, redirecting %s to /login", r.URL.Path))
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must be authenticated."})
+		log.Trace(fmt.Sprintf("Not authenticated, denying %s", r.URL.Path))
+		writeJsonError(w, http.StatusUnauthorized, "Access denied", "You must be authenticated.")
 	}
 }
 
 func AdminAuthRequired(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := sessions.Store.Get(r, "session")
-		value, ok := session.Values["valid"]
-		sessionUserTemp := session.Values["username"]
-		sessionUser, _ := sessionUserTemp.(string)
-		valid, okParse := value.(bool)
-
-		query := r.URL.Query()
-		username := query.Get("username")
-		password := query.Get("password")
-
-		if ok && okParse && valid {
-			if sessionUser != "admin" {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must authenticate as a admin user."})
-				return
-			}
-			log.Trace(fmt.Sprintf("Valid Session, serving %s", r.URL.Path))
-			handler.ServeHTTP(w, r)
-			return
-		} else if TestCredentials(username, password, false) {
-			if username != "admin" {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must authenticate as a admin user."})
-				return
-			}
-			log.Trace(fmt.Sprintf("Invalid Session, but authenticated with query: Session Saved. Serving %s", r.URL.Path))
-			handler.ServeHTTP(w, r)
+		username, ok := CurrentUser(r)
+		if !ok {
+			writeJsonError(w, http.StatusUnauthorized, "Access denied", "You must be authenticated as a admin user.")
 			return
 		}
-		log.Trace(fmt.Sprintf("Invalid Session, redirecting %s to /login", r.URL.Path))
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ResponseStruct{false, 401, "Access denied", "You must be authenticated as a admin user."})
+		if username != "admin" {
+			writeJsonError(w, http.StatusForbidden, "Access denied", "You must authenticate as a admin user.")
+			return
+		}
+		log.Trace(fmt.Sprintf("Authenticated as admin, serving %s", r.URL.Path))
+		handler.ServeHTTP(w, r)
 	}
 }
 
-func ProvideAuth(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := sessions.Store.Get(r, "session")
-		value, ok := session.Values["valid"]
-		valid, okParse := value.(bool)
-
-		query := r.URL.Query()
-		username := query.Get("username")
-		password := query.Get("password")
-
-		if ok && okParse && valid {
-			handler.ServeHTTP(w, r)
-			return
-		} else if TestCredentials(username, password, false) {
-
-			// Saves session
-			session, _ := sessions.Store.Get(r, "session")
-			session.Values["valid"] = true
-			session.Values["username"] = username
-			session.Save(r, w)
-			handler.ServeHTTP(w, r)
+// Rejects state-changing requests sent by browsers from other origins (CSRF protection)
+func CheckOrigin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet, http.MethodHead, http.MethodOptions:
+			next.ServeHTTP(w, r)
 			return
 		}
-		handler.ServeHTTP(w, r)
-	}
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			parsed, err := url.Parse(origin)
+			if err != nil || origin == "null" || parsed.Host != r.Host {
+				log.Warn(fmt.Sprintf("Blocked cross-origin %s request to %s from origin %q", r.Method, r.URL.Path, origin))
+				writeJsonError(w, http.StatusForbidden, "Access denied", "Cross-origin requests are not allowed.")
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func LimitBodySize(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func LogRequest(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// UA stands for user-agent
-		log.Trace(fmt.Sprintf("[\x1b[32m%s\x1b[0m] FROM: (\x1b[34m%s\x1b[0m) [%s] Serving path:\x1b[35m%s\x1b[0m, UA:%s", r.Method, r.RemoteAddr, r.Proto, r.URL.Path, r.UserAgent()))
+		log.Trace(fmt.Sprintf("[\x1b[32m%s\x1b[0m] FROM: (\x1b[34m%s\x1b[0m) [%s] Serving path:\x1b[35m%s\x1b[0m, UA:%q", r.Method, r.RemoteAddr, r.Proto, r.URL.Path, r.UserAgent()))
 		handler.ServeHTTP(w, r)
 	}
 }

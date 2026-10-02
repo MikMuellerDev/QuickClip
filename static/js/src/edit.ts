@@ -2,7 +2,7 @@ let spinnerLock = false;
 
 function setTitle(doc: Clip) {
   const titleElement = document.getElementById("title") as HTMLHeadingElement ;
-  titleElement.innerHTML = `Editing ${doc.Name}`;
+  titleElement.textContent = `Editing ${doc.Name}`;
 }
 
 function registerTypeEvents(doc: Clip) {

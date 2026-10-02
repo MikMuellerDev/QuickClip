@@ -16,12 +16,7 @@ func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginGetHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := sessions.Store.Get(r, "session")
-	sessionValidTemp, sessionValidTempOk := session.Values["valid"]
-	sessionUsernameTemp, sessionUsernameTempOk := session.Values["username"]
-	_, sessionUsernameOk := sessionUsernameTemp.(string)
-	sessionValid, sessionValidOk := sessionValidTemp.(bool)
-	if sessionValidTempOk && sessionUsernameTempOk && sessionUsernameOk && sessionValidOk && sessionValid {
+	if _, ok := sessions.User(r); ok {
 		http.Redirect(w, r, "/dash", http.StatusFound)
 		return
 	}
@@ -29,10 +24,7 @@ func loginGetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutGetHandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := sessions.Store.Get(r, "session")
-	session.Values["valid"] = false
-	session.Values["username"] = ""
-	session.Save(r, w)
+	sessions.Logout(w, r)
 	http.Redirect(w, r, "/dash", http.StatusFound)
 }
 
@@ -40,11 +32,17 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
-	if middleware.TestCredentials(username, password, false) {
-		session, _ := sessions.Store.Get(r, "session")
-		session.Values["valid"] = true
-		session.Values["username"] = username
-		session.Save(r, w)
+	success, limited := middleware.TestCredentials(r, username, password)
+	if limited {
+		templates.ExecuteTemplate(w, "login.html", http.StatusTooManyRequests)
+		return
+	}
+	if success {
+		if err := sessions.Login(w, r, username); err != nil {
+			log.Error("Could not create session: ", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 
 		if username == "admin" {
 			http.Redirect(w, r, "/admin", http.StatusFound)
@@ -90,7 +88,7 @@ func editGetHandler(w http.ResponseWriter, r *http.Request) {
 				templates.ExecuteTemplate(w, "edit.html", http.StatusOK)
 				return
 			} else {
-				templates.ExecuteTemplate(w, "404.html", http.StatusOK)
+				templates.ExecuteTemplate(w, "404.html", http.StatusNotFound)
 				return
 			}
 		} else {
@@ -98,7 +96,7 @@ func editGetHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		templates.ExecuteTemplate(w, "404.html", http.StatusOK)
+		templates.ExecuteTemplate(w, "404.html", http.StatusNotFound)
 	}
 }
 

@@ -19,6 +19,7 @@ func InitLogger(logger *logrus.Logger) {
 // Initializes a new Router, used in main.go
 func NewRouter() *mux.Router {
 	r := mux.NewRouter()
+	r.Use(middleware.CheckOrigin, middleware.LimitBodySize)
 
 	r.HandleFunc("/", middleware.LogRequest(indexGetHandler)).Methods("GET")
 	r.HandleFunc("/admin", middleware.AuthRequired(middleware.LogRequest(adminGetHandler))).Methods("GET")
@@ -26,24 +27,24 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/dash", middleware.LogRequest(dashGetHandler)).Methods("GET")
 	r.HandleFunc("/edit/{id}", middleware.LogRequest(editGetHandler)).Methods("GET")
 
-	r.HandleFunc("/api/save", middleware.LogRequest(saveToFile)).Methods("PUT")
+	r.HandleFunc("/api/save", middleware.ApiAuthRequired(middleware.LogRequest(saveToFile))).Methods("PUT")
 	r.HandleFunc("/api/version", middleware.LogRequest(getVersion)).Methods("GET")
 	r.HandleFunc("/api/clips", middleware.LogRequest(getClips)).Methods("GET")
-	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(middleware.ProvideAuth(getClipById))).Methods("GET")
+	r.HandleFunc("/api/clip/{id}", middleware.LogRequest(getClipById)).Methods("GET")
 	r.HandleFunc("/api/clip/probe/{id}", middleware.LogRequest(probeWriteAccess)).Methods("GET")
 	r.HandleFunc("/api/clip/refresh/{id}", getClipById).Methods("GET")
 
 	r.HandleFunc("/api/user", middleware.LogRequest(getApiUser)).Methods("GET")
 	r.HandleFunc("/api/users", middleware.AdminAuthRequired(middleware.LogRequest(getUserList))).Methods("GET")
 	r.HandleFunc("/api/user", middleware.AdminAuthRequired(middleware.LogRequest(createUser))).Methods("POST")
-	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(middleware.ProvideAuth(modifyUser)))).Methods("PUT")
-	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(middleware.ProvideAuth(deleteUser)))).Methods("DELETE")
-	r.HandleFunc("/api/password", middleware.ApiAuthRequired(middleware.LogRequest(middleware.ProvideAuth(alterPassword)))).Methods("PUT")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(modifyUser))).Methods("PUT")
+	r.HandleFunc("/api/user/{username}", middleware.AdminAuthRequired(middleware.LogRequest(deleteUser))).Methods("DELETE")
+	r.HandleFunc("/api/password", middleware.ApiAuthRequired(middleware.LogRequest(alterPassword))).Methods("PUT")
 
-	r.HandleFunc("/api/clips/update/{id}", middleware.ApiAuthRequired(middleware.LogRequest(middleware.ProvideAuth(removeClip)))).Methods("DELETE")
-	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(middleware.ProvideAuth(editClip))).Methods("PUT")
-	r.HandleFunc("/api/clips/update", middleware.ProvideAuth(middleware.ApiAuthRequired(middleware.LogRequest(modClip)))).Methods("PUT")
-	r.HandleFunc("/api/clips/add", middleware.ProvideAuth(middleware.ApiAuthRequired(middleware.LogRequest(addClip)))).Methods("POST")
+	r.HandleFunc("/api/clips/update/{id}", middleware.AdminAuthRequired(middleware.LogRequest(removeClip))).Methods("DELETE")
+	r.HandleFunc("/api/clips/edit/{id}", middleware.LogRequest(editClip)).Methods("PUT")
+	r.HandleFunc("/api/clips/update", middleware.AdminAuthRequired(middleware.LogRequest(modClip))).Methods("PUT")
+	r.HandleFunc("/api/clips/add", middleware.AdminAuthRequired(middleware.LogRequest(addClip))).Methods("POST")
 
 	r.HandleFunc("/login", middleware.LogRequest(loginGetHandler)).Methods("GET")
 	r.HandleFunc("/login", middleware.LogRequest(loginPostHandler)).Methods("POST")
